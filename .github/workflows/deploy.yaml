@@ -1,0 +1,40 @@
+name: deploy-book
+
+on: [ push ]
+
+jobs:
+  deploy-book:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+
+    # Install dependencies
+    - name: Set up Python 3.10
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        pip install poetry
+        poetry export -f requirements.txt --output requirements.txt
+        pip install -r requirements.txt
+    
+    # # Check external links in the book
+    # - name: Check external links
+    #   run: |
+    #     jupyter-book build . --builder linkcheck
+
+    # Build the book
+    - name: Build the book
+      run: |
+        jupyter-book build .
+
+    # Push the book's HTML to github-pages
+    - name: GitHub Pages action
+      uses: peaceiris/actions-gh-pages@v3.9.0
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./_build/html
+        publish_branch: gh-pages # deploying branch
