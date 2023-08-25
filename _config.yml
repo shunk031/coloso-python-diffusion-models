@@ -34,6 +34,7 @@ html:
   favicon: assets/favicon.png
   use_issues_button: true
   use_repository_button: true
+  google_analytics_id: G-8ZY8TGCYMR
 
 sphinx:
   config:
