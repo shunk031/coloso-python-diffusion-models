@@ -20,15 +20,10 @@ jobs:
         poetry export -f requirements.txt --output requirements.txt
         pip install -r requirements.txt
     
-    # # Check external links in the book
-    # - name: Check external links
-    #   run: |
-    #     jupyter-book build . --builder linkcheck
-
-    # Build the book
+    # Build the book by checking external links.
     - name: Build the book
       run: |
-        jupyter-book build .
+        jupyter-book build --builder linkcheck .
 
     # Push the book's HTML to github-pages
     - name: GitHub Pages action

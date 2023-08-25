@@ -42,6 +42,9 @@ sphinx:
     ogp_site_url: "https://shunk031.me/coloso-python-diffusion-models/README.html"
     ogp_image: "https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/logo.png"
     ogp_description_length: 200
+    linkcheck_ignore:
+      - https://app.diagrams.net/#Uhttps
+      - https://huggingface.co/docs/diffusers/api
   extra_extensions:
     - sphinxext.opengraph
   
