@@ -8,7 +8,9 @@
 [![Diffusers](https://img.shields.io/badge/🤗%20Diffusers-0.16.0-orange)](https://github.com/huggingface/diffusers)
 
 <p align="center">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/-IPEUOcPTas" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+ <a href="https://www.youtube.com/watch?v=-IPEUOcPTas">
+    <img width="560" src="https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/coloso_kitada_video.png">
+  </a>
 </p>
 
 本レポジトリでは [Coloso （コロソ）](https://coloso.jp/) で開講されている [`"画像生成 AI 入門：Python による拡散モデルの理論と実践"`](https://coloso.jp/programming/researchscientist-kitada-jp) で扱う notebook を管理しています。各 notebook は Jupyter notebook としてまとめられており、Google Colab で実行されることを想定しています。
