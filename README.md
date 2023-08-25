@@ -4,7 +4,7 @@
 
 [![deploy-book](https://github.com/shunk031/coloso-python-diffusion-models/actions/workflows/deploy.yaml/badge.svg)](https://github.com/shunk031/coloso-python-diffusion-models/actions/workflows/deploy.yaml)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://github.com/shunk031/coloso-python-diffusion-models/blob/main/LICENSE)
-![Python](https://img.shields.io/badge/🐍%20Python-3.8-orange)
+![Python](https://img.shields.io/badge/🐍%20Python-3.9+-orange)
 [![Diffusers](https://img.shields.io/badge/🤗%20Diffusers-0.16.0-orange)](https://github.com/huggingface/diffusers)
 
 <p align="center">
@@ -75,6 +75,12 @@
 疑問点や修正点は本レポジトリの [issue](https://github.com/shunk031/coloso-python-diffusion-models/issues) にて管理しています。不明点などがございましたら以下を確認し、解決方法が見つからない場合は新しく issue を作成してください。
 
 - https://github.com/shunk031/coloso-python-diffusion-models/issues
+
+## 🔗 関連リンク
+
+- 講座ページ | リサーチサイエンティスト 北田俊輔 | Coloso. | コロソ。https://coloso.jp/programming/researchscientist-kitada-jp 
+- Colaboratory へようこそ - Colaboratory https://colab.research.google.com
+- Huggingface Diffusers https://huggingface.co/docs/diffusers/index 
 
 ## License
 
