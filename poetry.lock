@@ -2327,7 +2327,7 @@ Sphinx = "*"
 [package.source]
 type = "git"
 url = "https://github.com/attakei-lab/sphinxcontrib-external-link.git"
-reference = "HEAD"
+reference = "main"
 resolved_reference = "b90522dee98503889c93ad29086429bc181b41be"
 
 [[package]]
@@ -2644,4 +2644,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "5f6751db4f2365a9ac572f4fafb6f84f8d642d609accea0c2f134632287bc0cc"
+content-hash = "828a3d5dc59fe41069654ddf1d8caf4f6f289e7d28cae74a867237f6328e243f"
