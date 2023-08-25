@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.10"
 jupyter-book = "^0.15.1"
 sphinxext-opengraph = "^0.8.2"
+sphinxcontrib-external-link = {git = "https://github.com/attakei-lab/sphinxcontrib-external-link.git"}
 
 
 [build-system]

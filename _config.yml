@@ -48,4 +48,5 @@ sphinx:
       - https://huggingface.co/docs/diffusers/api
   extra_extensions:
     - sphinxext.opengraph
+    - sphinxcontrib.external_link
   

@@ -2313,6 +2313,24 @@ lint = ["docutils-stubs", "flake8", "mypy"]
 test = ["pytest"]
 
 [[package]]
+name = "sphinxcontrib-external-link"
+version = "0.1.0"
+description = "Override ref(link to docs) extension to open new tab(window)"
+optional = false
+python-versions = "^3.7 | ^3.8 | ^3.9 | ^3.10"
+files = []
+develop = false
+
+[package.dependencies]
+Sphinx = "*"
+
+[package.source]
+type = "git"
+url = "https://github.com/attakei-lab/sphinxcontrib-external-link.git"
+reference = "HEAD"
+resolved_reference = "b90522dee98503889c93ad29086429bc181b41be"
+
+[[package]]
 name = "sphinxcontrib-htmlhelp"
 version = "2.0.4"
 description = "sphinxcontrib-htmlhelp is a sphinx extension which renders HTML help files"
@@ -2626,4 +2644,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "106a2f471aca52cb4d3edbb7ea9fa9ede372ed3334df54e9e45da1a69b72ba4e"
+content-hash = "5f6751db4f2365a9ac572f4fafb6f84f8d642d609accea0c2f134632287bc0cc"
