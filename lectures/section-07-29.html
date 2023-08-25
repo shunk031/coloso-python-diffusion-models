@@ -1,0 +1,975 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="ja" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="画像生成 AI 入門: Python による拡散モデルの理論と実践" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://shunk031.me/coloso-python-diffusion-models/lectures/section-07-29.html" />
+<meta property="og:site_name" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta property="og:description" content="Open In Colab Section 07. Play with Diffusion Model: Stable Diffusion を中心とした拡散モデルを用いて、最先端の画像生成技術を実際に動かして実践していきます。 Lecture 29. Safe Latent Diffusion: Safe Latent Diffusion[Schramowski+ CVPR'23] による、..." />
+<meta property="og:image" content="https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/logo.png" />
+<meta property="og:image:alt" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta name="description" content="Open In Colab Section 07. Play with Diffusion Model: Stable Diffusion を中心とした拡散モデルを用いて、最先端の画像生成技術を実際に動かして実践していきます。 Lecture 29. Safe Latent Diffusion: Safe Latent Diffusion[Schramowski+ CVPR'23] による、..." />
+
+    <title>画像生成 AI 入門: Python による拡散モデルの理論と実践 &#8212; 画像生成AI入門: Pythonによる拡散モデルの理論と実践</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-8ZY8TGCYMR"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-8ZY8TGCYMR');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'lectures/section-07-29';</script>
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="高解像度図表" href="../materials/figures/README.html" />
+    <link rel="prev" title="画像生成 AI 入門: Python による拡散モデルの理論と実践" href="section-07-28.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ja"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../README.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../README.html">
+                    画像生成 AI 入門：Python による拡散モデルの理論と実践
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-01-03.html">Play with Stable Diffusion!</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-02-05.html">About Deep Learning (2)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-03-08.html">Score-based Generative Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-09.html">Denoising Diffusion Probabilistic Model (1)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-10.html">Denoising Diffusion Probabilistic Model (2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-11.html">Beyond Conventional GANs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 4</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-04-12.html">About CLIP</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 6</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-06-18.html">Components of Stable Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 7</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-07-19.html">Stable Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-20.html">Textual Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-21.html">DreamBooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-22.html">Attend-and-Excite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-23.html">ControlNet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-24.html">Prompt-to-Prompt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-25.html">InstructPix2Pix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-26.html">unCLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-27.html">Paint-by-example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-28.html">LoRA</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Safe Latent Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">受講者特典</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../materials/figures/README.html">高解像度図表</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-07-29.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onColab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="ソースリポジトリ"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models/issues/new?title=Issue%20on%20page%20%2Flectures/section-07-29.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="問題を報告"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="このページをダウンロード">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/lectures/section-07-29.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="ソースファイルをダウンロード"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="PDFに印刷"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="全画面モード"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="検索" aria-label="検索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>画像生成 AI 入門: Python による拡散モデルの理論と実践</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目次 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-07-play-with-diffusion-model">Section 07. Play with Diffusion Model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-29-safe-latent-diffusion">Lecture 29. Safe Latent Diffusion</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">利用する Python ライブラリをインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#safe-latent-diffusion">Safe Latent Diffusion を扱うパイプラインを構築</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-concept">不適切なコンセプトを抑制する <code class="docutils literal notranslate"><span class="pre">Safety</span> <span class="pre">Concept</span></code> の確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stablediffusionpipelinesafe">StableDiffusionPipelineSafe による画像生成</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable-diffusion">オリジナルの Stable Diffusion との比較</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-configuration">複数の <code class="docutils literal notranslate"><span class="pre">Safety</span> <span class="pre">Configuration</span></code> における画像生成</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="ai-python">
+<h1>画像生成 AI 入門: Python による拡散モデルの理論と実践<a class="headerlink" href="#ai-python" title="Permalink to this heading">#</a></h1>
+<p><a class="reference external" href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-07-28.ipynb" rel="noreferrer" target="_blank"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<section id="section-07-play-with-diffusion-model">
+<h2>Section 07. Play with Diffusion Model<a class="headerlink" href="#section-07-play-with-diffusion-model" title="Permalink to this heading">#</a></h2>
+<p>Stable Diffusion を中心とした拡散モデルを用いて、最先端の画像生成技術を実際に動かして実践していきます。</p>
+<section id="lecture-29-safe-latent-diffusion">
+<h3>Lecture 29. Safe Latent Diffusion<a class="headerlink" href="#lecture-29-safe-latent-diffusion" title="Permalink to this heading">#</a></h3>
+<p>Safe Latent Diffusion <a class="reference external" href="https://arxiv.org/abs/2211.05105" rel="noreferrer" target="_blank">[Schramowski+ CVPR'23]</a> による、不適切な画像生成を抑制する手法を実践します。Safe Latent Diffusion は classifier-free guidance の枠組みを応用して、予め決めた &quot;不適切コンテンツ&quot; を生成しないように誘導する機構を備えています。
+<strong>一方で乱数のシード値やハイパーパラメータの設定によって不適切な画像が生成されてしまう場合もあることに注意してください。</strong></p>
+</section>
+</section>
+<section id="id1">
+<h2>セットアップ<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<section id="gpu">
+<h3>GPU が使用できるか確認<a class="headerlink" href="#gpu" title="Permalink to this heading">#</a></h3>
+<p>本 Colab ノートブックを実行するために GPU ランタイムを使用していることを確認します。CPU ランタイムと比べて画像生成がより早くなります。以下の <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> コマンドが失敗する場合は再度講義資料の <code class="docutils literal notranslate"><span class="pre">GPU</span> <span class="pre">使用設定</span></code> のスライド説明や Google Colab の <a class="reference external" href="https://research.google.com/colaboratory/faq.html#gpu-utilization" rel="noreferrer" target="_blank">FAQ</a> 等を参考にランタイムタイプが正しく変更されているか確認してください。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>nvidia-smi
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Wed Jul 26 07:20:52 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.105.17   Driver Version: 525.105.17   CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla T4            Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   44C    P8    10W /  70W |      0MiB / 15360MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="python">
+<h3>利用する Python ライブラリをインストール<a class="headerlink" href="#python" title="Permalink to this heading">#</a></h3>
+<p>diffusers ライブラリをインストールすることで拡散モデルを簡単に使用できるようにします。diffusers ライブラリを動かす上で必要となるライブラリも追加でインストールします:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/huggingface/transformers" rel="noreferrer" target="_blank">transformers</a>: 拡散モデルにおいて核となる Transformer モデルが定義されているライブラリ</p></li>
+<li><p><a class="reference external" href="https://github.com/huggingface/accelerate" rel="noreferrer" target="_blank">accelerate</a>: transformers と連携してより高速な画像生成をサポートするライブラリ</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">diffusers</span><span class="o">==</span><span class="m">0</span>.16.1
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers<span class="w"> </span>accelerate
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting diffusers==0.16.1
+  Downloading diffusers-0.16.1-py3-none-any.whl (934 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">934.9/934.9 kB</span> <span class=" -Color -Color-Red">8.5 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: Pillow in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (8.4.0)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (3.12.2)
+Collecting huggingface-hub&gt;=0.13.2 (from diffusers==0.16.1)
+  Downloading huggingface_hub-0.16.4-py3-none-any.whl (268 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">268.8/268.8 kB</span> <span class=" -Color -Color-Red">11.7 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: importlib-metadata in /usr/lib/python3/dist-packages (from diffusers==0.16.1) (4.6.4)
+Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (1.22.4)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (2022.10.31)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (2.27.1)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (2023.6.0)
+Requirement already satisfied: tqdm&gt;=4.42.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (4.65.0)
+Requirement already satisfied: pyyaml&gt;=5.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (6.0.1)
+Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (4.7.1)
+Requirement already satisfied: packaging&gt;=20.9 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (23.1)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (2023.5.7)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (3.4)
+Installing collected packages: huggingface-hub, diffusers
+Successfully installed diffusers-0.16.1 huggingface-hub-0.16.4
+Collecting transformers
+  Downloading transformers-4.31.0-py3-none-any.whl (7.4 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">7.4/7.4 MB</span> <span class=" -Color -Color-Red">22.4 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting accelerate
+  Downloading accelerate-0.21.0-py3-none-any.whl (244 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">244.2/244.2 kB</span> <span class=" -Color -Color-Red">27.2 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from transformers) (3.12.2)
+Requirement already satisfied: huggingface-hub&lt;1.0,&gt;=0.14.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (0.16.4)
+Requirement already satisfied: numpy&gt;=1.17 in /usr/local/lib/python3.10/dist-packages (from transformers) (1.22.4)
+Requirement already satisfied: packaging&gt;=20.0 in /usr/local/lib/python3.10/dist-packages (from transformers) (23.1)
+Requirement already satisfied: pyyaml&gt;=5.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (6.0.1)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from transformers) (2022.10.31)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from transformers) (2.27.1)
+Collecting tokenizers!=0.11.3,&lt;0.14,&gt;=0.11.1 (from transformers)
+  Downloading tokenizers-0.13.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (7.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">7.8/7.8 MB</span> <span class=" -Color -Color-Red">58.1 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting safetensors&gt;=0.3.1 (from transformers)
+  Downloading safetensors-0.3.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">1.3/1.3 MB</span> <span class=" -Color -Color-Red">62.4 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: tqdm&gt;=4.27 in /usr/local/lib/python3.10/dist-packages (from transformers) (4.65.0)
+Requirement already satisfied: psutil in /usr/local/lib/python3.10/dist-packages (from accelerate) (5.9.5)
+Requirement already satisfied: torch&gt;=1.10.0 in /usr/local/lib/python3.10/dist-packages (from accelerate) (2.0.1+cu118)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&lt;1.0,&gt;=0.14.1-&gt;transformers) (2023.6.0)
+Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&lt;1.0,&gt;=0.14.1-&gt;transformers) (4.7.1)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (1.11.1)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (3.1)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (3.1.2)
+Requirement already satisfied: triton==2.0.0 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (2.0.0)
+Requirement already satisfied: cmake in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate) (3.25.2)
+Requirement already satisfied: lit in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate) (16.0.6)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (2023.5.7)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (3.4)
+Requirement already satisfied: MarkupSafe&gt;=2.0 in /usr/local/lib/python3.10/dist-packages (from jinja2-&gt;torch&gt;=1.10.0-&gt;accelerate) (2.1.3)
+Requirement already satisfied: mpmath&gt;=0.19 in /usr/local/lib/python3.10/dist-packages (from sympy-&gt;torch&gt;=1.10.0-&gt;accelerate) (1.3.0)
+Installing collected packages: tokenizers, safetensors, transformers, accelerate
+Successfully installed accelerate-0.21.0 safetensors-0.3.1 tokenizers-0.13.3 transformers-4.31.0
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="safe-latent-diffusion">
+<h2>Safe Latent Diffusion を扱うパイプラインを構築<a class="headerlink" href="#safe-latent-diffusion" title="Permalink to this heading">#</a></h2>
+<p>本セクションでは <a class="reference external" href="https://huggingface.co/docs/diffusers/v0.16.0/en/api/pipelines/stable_diffusion_safe" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">StableDiffusionPipelineSafe</span></code></a> を使用して Stable Diffusion をもとにした Safe Latent Diffusion パイプラインの動作を確認します。</p>
+<p>まず準備として画像を複数生成した場合に結果を確認しやすいように、画像をグリッド上に表示する関数を以下のように定義します。この関数は <a class="reference external" href="https://huggingface.co/blog/stable_diffusion" rel="noreferrer" target="_blank">🤗 Hugging Face Stable Diffusion</a> のブログ記事のものを利用しています。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">PIL.Image</span> <span class="kn">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">PilImage</span>
+
+<span class="k">def</span> <span class="nf">image_grid</span><span class="p">(</span><span class="n">imgs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PilImage</span><span class="p">],</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PilImage</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span> <span class="o">==</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span>
+
+    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+    <span class="n">grid_w</span><span class="p">,</span> <span class="n">grid_h</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">imgs</span><span class="p">):</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="k">cols</span>*w, i//cols*h))
+    <span class="k">return</span> <span class="n">grid</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Stable Diffusion を元にした Safe Latent Diffusion は以下のように <code class="docutils literal notranslate"><span class="pre">StableDiffusionPipelineSafe</span></code> にて簡単に読み込むことが可能です。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">StableDiffusionPipeline</span><span class="p">,</span> <span class="n">StableDiffusionPipelineSafe</span>
+
+<span class="n">model_id</span> <span class="o">=</span> <span class="s2">&quot;runwayml/stable-diffusion-v1-5&quot;</span>
+
+<span class="c1"># パイプラインの読み込み</span>
+<span class="n">pipe_safe</span> <span class="o">=</span> <span class="n">StableDiffusionPipelineSafe</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+    <span class="n">model_id</span><span class="p">,</span>
+    <span class="n">revision</span><span class="o">=</span><span class="s2">&quot;fp16&quot;</span><span class="p">,</span>
+    <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pipe_safe</span> <span class="o">=</span> <span class="n">pipe_safe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "d4c51cff96b74bd5983a9701e8832b2b"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>text_encoder/model.safetensors not found
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "e68ec99d3e514fac96a0665b2f5aa63f"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f71a57d500314384a5227d86983d684e"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "a1b240b87b2f4099b8476df3d2287566"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "dd95fa2d08b54cce831b63fad95e6c53"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "1faf85aaeaaa4d0d86d298c818c96068"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "97087eea37ff440ea9421a201d89aaeb"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "c14d1df37f2a4bd0bd5a59447a4eb62e"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f8e0d516cb3e4b82bb680c57eed11ea1"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "45212462fdb644d7968f99958f91c1bd"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "da75577306764390945a4d0f19edc5e7"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "ed852ac4c81b4df29b8c25c45cad1188"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "23964fa50254410b8d336dc3795cdbc6"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "daf19bd1c6ea49958e6ed67bbc8b13bf"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "4b7b0069090c44e393c3f38b4dcff36f"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "0ef0fbb235ca415cb25831cdb6a755c9"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/usr/local/lib/python3.10/dist-packages/transformers/models/clip/feature_extraction_clip.py:28: FutureWarning: The class CLIPFeatureExtractor is deprecated and will be removed in version 5 of Transformers. Please use CLIPImageProcessor instead.
+  warnings.warn(
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+</pre></div>
+</div>
+</div>
+</div>
+<section id="safety-concept">
+<h3>不適切なコンセプトを抑制する <code class="docutils literal notranslate"><span class="pre">Safety</span> <span class="pre">Concept</span></code> の確認<a class="headerlink" href="#safety-concept" title="Permalink to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">StableDiffusionPipelineSafe</span></code> には不適切なコンセプトを抑制する classifier-free guidance を元にした機構が存在します。以下は本パイプラインが対象としている不適切コンセプトを <code class="docutils literal notranslate"><span class="pre">safety_concept</span></code> で確認してみます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipe_safe</span><span class="o">.</span><span class="n">safety_concept</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&#39;an image showing hate, harassment, violence, suffering, humiliation, harm, suicide, sexual, nudity, bodily fluids, blood, obscene gestures, illegal activity, drug use, theft, vandalism, weapons, child abuse, brutality, cruelty&#39;
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="stablediffusionpipelinesafe">
+<h3>StableDiffusionPipelineSafe による画像生成<a class="headerlink" href="#stablediffusionpipelinesafe" title="Permalink to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">StableDiffusionPipelineSafe</span></code> はこれまでのパイプライン同様に、プロンプトや乱数の seed 、classifier-free guidance のパラメータを与えて以下のように画像が生成可能です。今回使用するプロンプトは huggingface/diffusers の <code class="docutils literal notranslate"><span class="pre">StableDiffusionPipelineSafe</span></code> にて<a class="reference external" href="https://huggingface.co/docs/diffusers/v0.16.0/en/api/pipelines/stable_diffusion_safe#using-predefined-safety-configurations" rel="noreferrer" target="_blank">挙げられている例</a>を使用しています。このプロンプト例は必ずしも不適切なコンテンツを表していないことに注意してください。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;the four horsewomen of the apocalypse, painting by tom of finland, gaston bussiere, craig mullins, j. c. leyendecker&quot;</span>
+
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">42</span>
+<span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">guidance_scale</span> <span class="o">=</span> <span class="mi">6</span>
+
+<span class="n">image_safe</span> <span class="o">=</span> <span class="n">pipe_safe</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+    <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="n">guidance_scale</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">image_safe</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "56b70b33691c4cfea4221463fce3faf5"}</script><img alt="../_images/56da1024a3e4c6cf7502af8a8f607c54d485624605b491bbad77aed06af70a41.png" src="../_images/56da1024a3e4c6cf7502af8a8f607c54d485624605b491bbad77aed06af70a41.png" />
+</div>
+</div>
+</section>
+<section id="stable-diffusion">
+<h3>オリジナルの Stable Diffusion との比較<a class="headerlink" href="#stable-diffusion" title="Permalink to this heading">#</a></h3>
+<p>オリジナルの Stable Diffusion を <code class="docutils literal notranslate"><span class="pre">StableDiffusionPipeline</span></code> を用いて読み込み、上記と同様のプロンプトを使用して画像を生成させてみます。これまで同様に以下のようにしてパイプラインを読み込みます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">StableDiffusionPipeline</span>
+
+<span class="n">pipe_unsafe</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+    <span class="n">model_id</span><span class="p">,</span> <span class="n">revision</span><span class="o">=</span><span class="s2">&quot;fp16&quot;</span><span class="p">,</span> <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span>
+<span class="p">)</span>
+<span class="n">pipe_unsafe</span> <span class="o">=</span> <span class="n">pipe_unsafe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>text_encoder/model.safetensors not found
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+</pre></div>
+</div>
+</div>
+</div>
+<p>読み込んだ <code class="docutils literal notranslate"><span class="pre">StableDiffusionPipeline</span></code> を用いて上記で試したプロンプトで画像を生成させてみましょう。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+<span class="n">image_unsafe</span> <span class="o">=</span> <span class="n">pipe_unsafe</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span> <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span> <span class="n">guidance_scale</span><span class="o">=</span><span class="n">guidance_scale</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">image_grid</span><span class="p">([</span><span class="n">image_unsafe</span><span class="p">,</span> <span class="n">image_safe</span><span class="p">],</span> <span class="n">rows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "345ba94a1f3f44d0855df1820d874f11"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Potential NSFW content was detected in one or more images. A black image will be returned instead. Try again with a different prompt and/or seed.
+</pre></div>
+</div>
+<img alt="../_images/be2f66404464642b4a920a13ae88a7c809f79779acefc5aed3839607ea65eb40.png" src="../_images/be2f66404464642b4a920a13ae88a7c809f79779acefc5aed3839607ea65eb40.png" />
+</div>
+</div>
+<p>オリジナルの Stable Diffusion で画像を生成させた場合、NSFW (not safe for work) フィルターに引っかかってしまいました。一方で Safe Latent Diffusion では NSFW フィルターの判定では安全だと考えられる画像が生成されました。</p>
+</section>
+<section id="safety-configuration">
+<h3>複数の <code class="docutils literal notranslate"><span class="pre">Safety</span> <span class="pre">Configuration</span></code> における画像生成<a class="headerlink" href="#safety-configuration" title="Permalink to this heading">#</a></h3>
+<p>Safe Latent Diffusion の論文でも紹介されていた 4 つのハイパーパラメータ（safety configuration）の設定 <code class="docutils literal notranslate"><span class="pre">WEAK</span></code>, <code class="docutils literal notranslate"><span class="pre">MEDIUM</span></code>, <code class="docutils literal notranslate"><span class="pre">STRONG</span></code>, <code class="docutils literal notranslate"><span class="pre">MAX</span></code> をそれぞれ比較していきます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">diffusers.pipelines.stable_diffusion_safe</span> <span class="kn">import</span> <span class="n">SafetyConfig</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;WEAK:   </span><span class="si">{</span><span class="n">SafetyConfig</span><span class="o">.</span><span class="n">WEAK</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MEDIUM: </span><span class="si">{</span><span class="n">SafetyConfig</span><span class="o">.</span><span class="n">MEDIUM</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;STRONG: </span><span class="si">{</span><span class="n">SafetyConfig</span><span class="o">.</span><span class="n">STRONG</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;MAX:    </span><span class="si">{</span><span class="n">SafetyConfig</span><span class="o">.</span><span class="n">MAX</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>WEAK:   {&#39;sld_warmup_steps&#39;: 15, &#39;sld_guidance_scale&#39;: 20, &#39;sld_threshold&#39;: 0.0, &#39;sld_momentum_scale&#39;: 0.0, &#39;sld_mom_beta&#39;: 0.0}
+MEDIUM: {&#39;sld_warmup_steps&#39;: 10, &#39;sld_guidance_scale&#39;: 1000, &#39;sld_threshold&#39;: 0.01, &#39;sld_momentum_scale&#39;: 0.3, &#39;sld_mom_beta&#39;: 0.4}
+STRONG: {&#39;sld_warmup_steps&#39;: 7, &#39;sld_guidance_scale&#39;: 2000, &#39;sld_threshold&#39;: 0.025, &#39;sld_momentum_scale&#39;: 0.5, &#39;sld_mom_beta&#39;: 0.7}
+MAX:    {&#39;sld_warmup_steps&#39;: 0, &#39;sld_guidance_scale&#39;: 5000, &#39;sld_threshold&#39;: 1.0, &#39;sld_momentum_scale&#39;: 0.5, &#39;sld_mom_beta&#39;: 0.7}
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">StableDiffusionPipelineSafe</span></code> ではデフォルトでは <code class="docutils literal notranslate"><span class="pre">SafetyConfig.MEDIUM</span></code> のハイパーパラメータが採用されています。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;the four horsewomen of the apocalypse, </span><span class="se">\</span>
+<span class="s2">painting by tom of finland, gaston bussiere, </span><span class="se">\</span>
+<span class="s2">craig mullins, j. c. leyendecker&quot;</span>
+
+<span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+<span class="n">image_default</span> <span class="o">=</span> <span class="n">pipe_safe</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+    <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="n">guidance_scale</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+<span class="n">image_medium</span> <span class="o">=</span> <span class="n">pipe_safe</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+    <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="n">guidance_scale</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">SafetyConfig</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span> <span class="c1"># MEDIUM のハイパーパラメータを指定</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+<span class="n">image_grid</span><span class="p">([</span><span class="n">image_default</span><span class="p">,</span> <span class="n">image_medium</span><span class="p">],</span> <span class="n">rows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "832ffa01bd914d7cb354df12adc5749e"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "c976b645814f447f821b454297f7eba2"}</script><img alt="../_images/4bbd3f14d552a4d49b953898b9515e80382dee1115feac987e7ac41f7d1333bb.png" src="../_images/4bbd3f14d552a4d49b953898b9515e80382dee1115feac987e7ac41f7d1333bb.png" />
+</div>
+</div>
+<p>以下は <code class="docutils literal notranslate"><span class="pre">MEDIUM</span></code>, <code class="docutils literal notranslate"><span class="pre">STRONG</span></code>, <code class="docutils literal notranslate"><span class="pre">MAX</span></code> それぞれのハイパーパラメータの設定で Safe Latent Diffusion で画像を生成させたときの結果です。ハイパーパラメータの強度を上げれば上げるほど不適切なコンテンツを生成する確率が下がるように見えます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">safety_configs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># &quot;WEAK&quot;: SafetyConfig.WEAK, # 不適切な画像が生成しうるので、今回は対象外としました</span>
+    <span class="s2">&quot;MEDIUM&quot;</span><span class="p">:</span> <span class="n">SafetyConfig</span><span class="o">.</span><span class="n">MEDIUM</span><span class="p">,</span>
+    <span class="s2">&quot;STRONG&quot;</span><span class="p">:</span> <span class="n">SafetyConfig</span><span class="o">.</span><span class="n">STRONG</span><span class="p">,</span>
+    <span class="s2">&quot;MAX&quot;</span><span class="p">:</span> <span class="n">SafetyConfig</span><span class="o">.</span><span class="n">MAX</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">generated_images</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">config_type</span><span class="p">,</span> <span class="n">safety_config</span> <span class="ow">in</span> <span class="n">safety_configs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Generating images based on the following safety config: </span><span class="si">{</span><span class="n">config_type</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="n">safety_config</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">generated_image</span> <span class="o">=</span> <span class="n">pipe_safe</span><span class="p">(</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+        <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+        <span class="n">guidance_scale</span><span class="o">=</span><span class="n">guidance_scale</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">safety_config</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">generated_images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">generated_image</span><span class="p">)</span>
+
+<span class="n">image_grid</span><span class="p">(</span><span class="n">generated_images</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">generated_images</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generating images based on the following safety config: MEDIUM -&gt; {&#39;sld_warmup_steps&#39;: 10, &#39;sld_guidance_scale&#39;: 1000, &#39;sld_threshold&#39;: 0.01, &#39;sld_momentum_scale&#39;: 0.3, &#39;sld_mom_beta&#39;: 0.4}
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "691e981515474084b56480a57f500edb"}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generating images based on the following safety config: STRONG -&gt; {&#39;sld_warmup_steps&#39;: 7, &#39;sld_guidance_scale&#39;: 2000, &#39;sld_threshold&#39;: 0.025, &#39;sld_momentum_scale&#39;: 0.5, &#39;sld_mom_beta&#39;: 0.7}
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "d3e58800f6d044eaaf1c5ef2e3c82d85"}</script><div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Generating images based on the following safety config: MAX -&gt; {&#39;sld_warmup_steps&#39;: 0, &#39;sld_guidance_scale&#39;: 5000, &#39;sld_threshold&#39;: 1.0, &#39;sld_momentum_scale&#39;: 0.5, &#39;sld_mom_beta&#39;: 0.7}
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "9a6feaef302b4f11aee6ae2ea5cccd5c"}</script><img alt="../_images/66d60fb2ae228a6d5b384e7e1a108a57b17c1118ebfbf75a13309eb6520209d7.png" src="../_images/66d60fb2ae228a6d5b384e7e1a108a57b17c1118ebfbf75a13309eb6520209d7.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./lectures"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="section-07-28.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">前へ</p>
+        <p class="prev-next-title">画像生成 AI 入門: Python による拡散モデルの理論と実践</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="../materials/figures/README.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">次へ</p>
+        <p class="prev-next-title">高解像度図表</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目次
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-07-play-with-diffusion-model">Section 07. Play with Diffusion Model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-29-safe-latent-diffusion">Lecture 29. Safe Latent Diffusion</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">利用する Python ライブラリをインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#safe-latent-diffusion">Safe Latent Diffusion を扱うパイプラインを構築</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-concept">不適切なコンセプトを抑制する <code class="docutils literal notranslate"><span class="pre">Safety</span> <span class="pre">Concept</span></code> の確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stablediffusionpipelinesafe">StableDiffusionPipelineSafe による画像生成</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#stable-diffusion">オリジナルの Stable Diffusion との比較</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#safety-configuration">複数の <code class="docutils literal notranslate"><span class="pre">Safety</span> <span class="pre">Configuration</span></code> における画像生成</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+著者 リサーチサイエンティスト 北田俊輔
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

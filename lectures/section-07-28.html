@@ -1,0 +1,1646 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="ja" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="画像生成 AI 入門: Python による拡散モデルの理論と実践" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://shunk031.me/coloso-python-diffusion-models/lectures/section-07-28.html" />
+<meta property="og:site_name" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta property="og:description" content="Open In Colab Section 07. Play with Diffusion Model: Stable Diffusion を中心とした拡散モデルを用いて、最先端の画像生成技術を実際に動かして実践していきます。 Lecture 28. LoRA: LoRA[Hu+ ICLR'22] を用いて元々の Stable Diffusion の重みはそのままに、省メモリを達成しながらさ..." />
+<meta property="og:image" content="https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/logo.png" />
+<meta property="og:image:alt" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta name="description" content="Open In Colab Section 07. Play with Diffusion Model: Stable Diffusion を中心とした拡散モデルを用いて、最先端の画像生成技術を実際に動かして実践していきます。 Lecture 28. LoRA: LoRA[Hu+ ICLR'22] を用いて元々の Stable Diffusion の重みはそのままに、省メモリを達成しながらさ..." />
+
+    <title>画像生成 AI 入門: Python による拡散モデルの理論と実践 &#8212; 画像生成AI入門: Pythonによる拡散モデルの理論と実践</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-8ZY8TGCYMR"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-8ZY8TGCYMR');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'lectures/section-07-28';</script>
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="画像生成 AI 入門: Python による拡散モデルの理論と実践" href="section-07-29.html" />
+    <link rel="prev" title="画像生成 AI 入門: Python による拡散モデルの理論と実践" href="section-07-27.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ja"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../README.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../README.html">
+                    画像生成 AI 入門：Python による拡散モデルの理論と実践
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-01-03.html">Play with Stable Diffusion!</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-02-05.html">About Deep Learning (2)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-03-08.html">Score-based Generative Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-09.html">Denoising Diffusion Probabilistic Model (1)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-10.html">Denoising Diffusion Probabilistic Model (2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-11.html">Beyond Conventional GANs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 4</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-04-12.html">About CLIP</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 6</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-06-18.html">Components of Stable Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 7</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-07-19.html">Stable Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-20.html">Textual Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-21.html">DreamBooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-22.html">Attend-and-Excite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-23.html">ControlNet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-24.html">Prompt-to-Prompt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-25.html">InstructPix2Pix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-26.html">unCLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-27.html">Paint-by-example</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">LoRA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-29.html">Safe Latent Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">受講者特典</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../materials/figures/README.html">高解像度図表</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-07-28.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onColab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="ソースリポジトリ"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models/issues/new?title=Issue%20on%20page%20%2Flectures/section-07-28.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="問題を報告"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="このページをダウンロード">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/lectures/section-07-28.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="ソースファイルをダウンロード"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="PDFに印刷"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="全画面モード"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="検索" aria-label="検索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>画像生成 AI 入門: Python による拡散モデルの理論と実践</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目次 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-07-play-with-diffusion-model">Section 07. Play with Diffusion Model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-28-lora">Lecture 28. LoRA</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#huggingface-diffusers-clone">huggingface/diffusers からレポジトリを clone してインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#text-to-image-lora">Text-to-Image における LoRA チューニング</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">依存ライブラリのインストール</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lora">LoRA チューニングの実施</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">LoRA チューニング結果を元にした推論</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dreambooth-lora">DreamBooth における LoRA チューニング</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">依存ライブラリのインストール</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">LoRA チューニングの実施</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">LoRA チューニング結果を元にした推論</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="ai-python">
+<h1>画像生成 AI 入門: Python による拡散モデルの理論と実践<a class="headerlink" href="#ai-python" title="Permalink to this heading">#</a></h1>
+<p><a class="reference external" href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-07-28.ipynb" rel="noreferrer" target="_blank"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<section id="section-07-play-with-diffusion-model">
+<h2>Section 07. Play with Diffusion Model<a class="headerlink" href="#section-07-play-with-diffusion-model" title="Permalink to this heading">#</a></h2>
+<p>Stable Diffusion を中心とした拡散モデルを用いて、最先端の画像生成技術を実際に動かして実践していきます。</p>
+<section id="lecture-28-lora">
+<h3>Lecture 28. LoRA<a class="headerlink" href="#lecture-28-lora" title="Permalink to this heading">#</a></h3>
+<p>LoRA <a class="reference external" href="https://arxiv.org/abs/2106.09685" rel="noreferrer" target="_blank">[Hu+ ICLR'22]</a> を用いて元々の Stable Diffusion の重みはそのままに、省メモリを達成しながらさまざまなスタイルを学習可能にしていきます。以下 <a class="reference external" href="https://huggingface.co/docs/diffusers/training/lora" rel="noreferrer" target="_blank">🤗 Low-Rank Adaptation of Large Language Models (LoRA)</a> を参考に動作を追っていきます。</p>
+<p>huggingface/diffusers では 2023/07/25 現在、LoRA は <a class="reference external" href="https://huggingface.co/docs/diffusers/api/models/unet2d-cond" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">UNet2DConditionalModel</span></code></a> の attention 層のみに対応しています。また、一部 DreamBooth の text encoder を LoRA で微調整することもサポートしています。DreamBooth の text encoder を微調整すると一般的に良い結果が得られますが、計算量が増える可能性があります。</p>
+</section>
+</section>
+<section id="id1">
+<h2>セットアップ<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<section id="gpu">
+<h3>GPU が使用できるか確認<a class="headerlink" href="#gpu" title="Permalink to this heading">#</a></h3>
+<p>本 Colab ノートブックを実行するために GPU ランタイムを使用していることを確認します。CPU ランタイムと比べて画像生成がより早くなります。以下の <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> コマンドが失敗する場合は再度講義資料の <code class="docutils literal notranslate"><span class="pre">GPU</span> <span class="pre">使用設定</span></code> のスライド説明や Google Colab の <a class="reference external" href="https://research.google.com/colaboratory/faq.html#gpu-utilization" rel="noreferrer" target="_blank">FAQ</a> 等を参考にランタイムタイプが正しく変更されているか確認してください。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>nvidia-smi
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sat Jul 29 02:49:30 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.105.17   Driver Version: 525.105.17   CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla T4            Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   42C    P8    10W /  70W |      0MiB / 15360MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="huggingface-diffusers-clone">
+<h3>huggingface/diffusers からレポジトリを clone してインストール<a class="headerlink" href="#huggingface-diffusers-clone" title="Permalink to this heading">#</a></h3>
+<p>今回は <a class="reference external" href="https://github.com/huggingface/diffusers" rel="noreferrer" target="_blank">huggingface/diffusers</a> の example に用意されている以下 2 つの python スクリプトを使用します:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora.py" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">examples/text_to_image/train_text_to_image_lora.py</span></code></a></p></li>
+<li><p><a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth_lora.py" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">examples/dreambooth/train_dreambooth_lora.py</span></code></a></p></li>
+</ul>
+<p>これらのスクリプトを使用するために、huggingface/diffusers からレポジトリを clone します。その後 clone したレポジトリのディレクトリに移動し、ベースとなる依存ライブラリを pip でインストールします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/huggingface/diffusers.git
+<span class="o">%</span><span class="k">cd</span> /content/diffusers
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>.
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Cloning into &#39;diffusers&#39;...
+remote: Enumerating objects: 32512, done.
+remote: Total 32512 (delta 0), reused 0 (delta 0), pack-reused 32512
+Receiving objects: 100% (32512/32512), 20.83 MiB | 22.96 MiB/s, done.
+Resolving deltas: 100% (23967/23967), done.
+/content/diffusers
+Processing /content/diffusers
+  Installing build dependencies ... ?25l?25hdone
+  Getting requirements to build wheel ... ?25l?25hdone
+  Preparing metadata (pyproject.toml) ... ?25l?25hdone
+Requirement already satisfied: importlib-metadata in /usr/lib/python3/dist-packages (from diffusers==0.20.0.dev0) (4.6.4)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from diffusers==0.20.0.dev0) (3.12.2)
+Collecting huggingface-hub&gt;=0.13.2 (from diffusers==0.20.0.dev0)
+  Downloading huggingface_hub-0.16.4-py3-none-any.whl (268 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">268.8/268.8 kB</span> <span class=" -Color -Color-Red">4.8 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from diffusers==0.20.0.dev0) (1.22.4)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from diffusers==0.20.0.dev0) (2022.10.31)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from diffusers==0.20.0.dev0) (2.27.1)
+Collecting safetensors&gt;=0.3.1 (from diffusers==0.20.0.dev0)
+  Downloading safetensors-0.3.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">1.3/1.3 MB</span> <span class=" -Color -Color-Red">31.5 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: Pillow in /usr/local/lib/python3.10/dist-packages (from diffusers==0.20.0.dev0) (9.4.0)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.20.0.dev0) (2023.6.0)
+Requirement already satisfied: tqdm&gt;=4.42.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.20.0.dev0) (4.65.0)
+Requirement already satisfied: pyyaml&gt;=5.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.20.0.dev0) (6.0.1)
+Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.20.0.dev0) (4.7.1)
+Requirement already satisfied: packaging&gt;=20.9 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.20.0.dev0) (23.1)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.20.0.dev0) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.20.0.dev0) (2023.7.22)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.20.0.dev0) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.20.0.dev0) (3.4)
+Building wheels for collected packages: diffusers
+  Building wheel for diffusers (pyproject.toml) ... ?25l?25hdone
+  Created wheel for diffusers: filename=diffusers-0.20.0.dev0-py3-none-any.whl size=1321056 sha256=75554b5a2ce81961996250c8c01d1f9c2db76ea1310abb74db240027c0be84e7
+  Stored in directory: /tmp/pip-ephem-wheel-cache-pn2f90cg/wheels/95/c5/3b/e1b4269f8a2584de57e75f949a185b48fc4144e9a91fc9965a
+Successfully built diffusers
+Installing collected packages: safetensors, huggingface-hub, diffusers
+Successfully installed diffusers-0.20.0.dev0 huggingface-hub-0.16.4 safetensors-0.3.1
+</pre></div>
+</div>
+</div>
+</div>
+<p>準備として画像を複数生成した場合に結果を確認しやすいように、画像をグリッド上に表示する関数を以下のように定義します。この関数は <a class="reference external" href="https://huggingface.co/blog/stable_diffusion" rel="noreferrer" target="_blank">🤗 Hugging Face Stable Diffusion</a> のブログ記事のものを利用しています。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">PIL.Image</span> <span class="kn">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">PilImage</span>
+
+<span class="k">def</span> <span class="nf">image_grid</span><span class="p">(</span><span class="n">imgs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PilImage</span><span class="p">],</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PilImage</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span> <span class="o">==</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span>
+
+    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+    <span class="n">grid_w</span><span class="p">,</span> <span class="n">grid_h</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">imgs</span><span class="p">):</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="k">cols</span>*w, i//cols*h))
+    <span class="k">return</span> <span class="n">grid</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="text-to-image-lora">
+<h2>Text-to-Image における LoRA チューニング<a class="headerlink" href="#text-to-image-lora" title="Permalink to this heading">#</a></h2>
+<p>LoRA でモデルの微調整は LoRA チューニングと呼ぶことが多く、従来のモデル全体の微調整はフルファインチューニングと呼ばれています。</p>
+<p>何十億ものパラメータを持つ Stable Diffusion のような拡散モデルのフルファインチューニングは時間もコストも掛かります。LoRA チューニングを使用すると拡散モデルの微調整が遥かに簡単に、かつ高速になります。LoRA は効果的な注意機構 (attention mechanism) や 8-bit optimizer などの GPU RAM の省メモリ技術に頼ることなく、Colab GPU 上のわずか 11 GB の GPU RAM で動作します。</p>
+<section id="id2">
+<h3>依存ライブラリのインストール<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<p>本セクションでは <a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/train_text_to_image_lora.py" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">examples/text_to_image/train_text_to_image_lora.py</span></code></a> を使用して text-to-image モデルの LoRA チューニングを試します。ここでは、LoRA チューニングが可能なスクリプトで使用するライブラリを、対応する <a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/examples/text_to_image/requirements.txt" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">examples/text_to_image/requirements.txt</span></code></a> からインストールします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">cd</span> /content/diffusers/examples/text_to_image
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/content/diffusers/examples/text_to_image
+Collecting accelerate&gt;=0.16.0 (from -r requirements.txt (line 1))
+  Downloading accelerate-0.21.0-py3-none-any.whl (244 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">244.2/244.2 kB</span> <span class=" -Color -Color-Red">4.2 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: torchvision in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 2)) (0.15.2+cu118)
+Collecting transformers&gt;=4.25.1 (from -r requirements.txt (line 3))
+  Downloading transformers-4.31.0-py3-none-any.whl (7.4 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">7.4/7.4 MB</span> <span class=" -Color -Color-Red">18.1 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting datasets (from -r requirements.txt (line 4))
+  Downloading datasets-2.14.1-py3-none-any.whl (492 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">492.4/492.4 kB</span> <span class=" -Color -Color-Red">23.7 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting ftfy (from -r requirements.txt (line 5))
+  Downloading ftfy-6.1.1-py3-none-any.whl (53 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">53.1/53.1 kB</span> <span class=" -Color -Color-Red">5.8 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: tensorboard in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 6)) (2.12.3)
+Requirement already satisfied: Jinja2 in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 7)) (3.1.2)
+Requirement already satisfied: numpy&gt;=1.17 in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (1.22.4)
+Requirement already satisfied: packaging&gt;=20.0 in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (23.1)
+Requirement already satisfied: psutil in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (5.9.5)
+Requirement already satisfied: pyyaml in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (6.0.1)
+Requirement already satisfied: torch&gt;=1.10.0 in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (2.0.1+cu118)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from torchvision-&gt;-r requirements.txt (line 2)) (2.27.1)
+Requirement already satisfied: pillow!=8.3.*,&gt;=5.3.0 in /usr/local/lib/python3.10/dist-packages (from torchvision-&gt;-r requirements.txt (line 2)) (9.4.0)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (3.12.2)
+Requirement already satisfied: typing-extensions in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (4.7.1)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (1.11.1)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (3.1)
+Requirement already satisfied: triton==2.0.0 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (2.0.0)
+Requirement already satisfied: cmake in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (3.25.2)
+Requirement already satisfied: lit in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (16.0.6)
+Requirement already satisfied: huggingface-hub&lt;1.0,&gt;=0.14.1 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (0.16.4)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (2022.10.31)
+Collecting tokenizers!=0.11.3,&lt;0.14,&gt;=0.11.1 (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3))
+  Downloading tokenizers-0.13.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (7.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">7.8/7.8 MB</span> <span class=" -Color -Color-Red">42.9 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: safetensors&gt;=0.3.1 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (0.3.1)
+Requirement already satisfied: tqdm&gt;=4.27 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (4.65.0)
+Requirement already satisfied: pyarrow&gt;=8.0.0 in /usr/local/lib/python3.10/dist-packages (from datasets-&gt;-r requirements.txt (line 4)) (9.0.0)
+Collecting dill&lt;0.3.8,&gt;=0.3.0 (from datasets-&gt;-r requirements.txt (line 4))
+  Downloading dill-0.3.7-py3-none-any.whl (115 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">115.3/115.3 kB</span> <span class=" -Color -Color-Red">12.6 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: pandas in /usr/local/lib/python3.10/dist-packages (from datasets-&gt;-r requirements.txt (line 4)) (1.5.3)
+Collecting xxhash (from datasets-&gt;-r requirements.txt (line 4))
+  Downloading xxhash-3.2.0-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (212 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">212.5/212.5 kB</span> <span class=" -Color -Color-Red">24.2 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting multiprocess (from datasets-&gt;-r requirements.txt (line 4))
+  Downloading multiprocess-0.70.15-py310-none-any.whl (134 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">134.8/134.8 kB</span> <span class=" -Color -Color-Red">15.2 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: fsspec[http]&gt;=2021.11.1 in /usr/local/lib/python3.10/dist-packages (from datasets-&gt;-r requirements.txt (line 4)) (2023.6.0)
+Requirement already satisfied: aiohttp in /usr/local/lib/python3.10/dist-packages (from datasets-&gt;-r requirements.txt (line 4)) (3.8.5)
+Requirement already satisfied: wcwidth&gt;=0.2.5 in /usr/local/lib/python3.10/dist-packages (from ftfy-&gt;-r requirements.txt (line 5)) (0.2.6)
+Requirement already satisfied: absl-py&gt;=0.4 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (1.4.0)
+Requirement already satisfied: grpcio&gt;=1.48.2 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (1.56.2)
+Requirement already satisfied: google-auth&lt;3,&gt;=1.6.3 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (2.17.3)
+Requirement already satisfied: google-auth-oauthlib&lt;1.1,&gt;=0.5 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (1.0.0)
+Requirement already satisfied: markdown&gt;=2.6.8 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (3.4.4)
+Requirement already satisfied: protobuf&gt;=3.19.6 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (3.20.3)
+Requirement already satisfied: setuptools&gt;=41.0.0 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (67.7.2)
+Requirement already satisfied: tensorboard-data-server&lt;0.8.0,&gt;=0.7.0 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (0.7.1)
+Requirement already satisfied: werkzeug&gt;=1.0.1 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (2.3.6)
+Requirement already satisfied: wheel&gt;=0.26 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 6)) (0.41.0)
+Requirement already satisfied: MarkupSafe&gt;=2.0 in /usr/local/lib/python3.10/dist-packages (from Jinja2-&gt;-r requirements.txt (line 7)) (2.1.3)
+Requirement already satisfied: attrs&gt;=17.3.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp-&gt;datasets-&gt;-r requirements.txt (line 4)) (23.1.0)
+Requirement already satisfied: charset-normalizer&lt;4.0,&gt;=2.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp-&gt;datasets-&gt;-r requirements.txt (line 4)) (2.0.12)
+Requirement already satisfied: multidict&lt;7.0,&gt;=4.5 in /usr/local/lib/python3.10/dist-packages (from aiohttp-&gt;datasets-&gt;-r requirements.txt (line 4)) (6.0.4)
+Requirement already satisfied: async-timeout&lt;5.0,&gt;=4.0.0a3 in /usr/local/lib/python3.10/dist-packages (from aiohttp-&gt;datasets-&gt;-r requirements.txt (line 4)) (4.0.2)
+Requirement already satisfied: yarl&lt;2.0,&gt;=1.0 in /usr/local/lib/python3.10/dist-packages (from aiohttp-&gt;datasets-&gt;-r requirements.txt (line 4)) (1.9.2)
+Requirement already satisfied: frozenlist&gt;=1.1.1 in /usr/local/lib/python3.10/dist-packages (from aiohttp-&gt;datasets-&gt;-r requirements.txt (line 4)) (1.4.0)
+Requirement already satisfied: aiosignal&gt;=1.1.2 in /usr/local/lib/python3.10/dist-packages (from aiohttp-&gt;datasets-&gt;-r requirements.txt (line 4)) (1.3.1)
+Requirement already satisfied: cachetools&lt;6.0,&gt;=2.0.0 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 6)) (5.3.1)
+Requirement already satisfied: pyasn1-modules&gt;=0.2.1 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 6)) (0.3.0)
+Requirement already satisfied: six&gt;=1.9.0 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 6)) (1.16.0)
+Requirement already satisfied: rsa&lt;5,&gt;=3.1.4 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 6)) (4.9)
+Requirement already satisfied: requests-oauthlib&gt;=0.7.0 in /usr/local/lib/python3.10/dist-packages (from google-auth-oauthlib&lt;1.1,&gt;=0.5-&gt;tensorboard-&gt;-r requirements.txt (line 6)) (1.3.1)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;torchvision-&gt;-r requirements.txt (line 2)) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;torchvision-&gt;-r requirements.txt (line 2)) (2023.7.22)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;torchvision-&gt;-r requirements.txt (line 2)) (3.4)
+Requirement already satisfied: python-dateutil&gt;=2.8.1 in /usr/local/lib/python3.10/dist-packages (from pandas-&gt;datasets-&gt;-r requirements.txt (line 4)) (2.8.2)
+Requirement already satisfied: pytz&gt;=2020.1 in /usr/local/lib/python3.10/dist-packages (from pandas-&gt;datasets-&gt;-r requirements.txt (line 4)) (2022.7.1)
+Requirement already satisfied: pyasn1&lt;0.6.0,&gt;=0.4.6 in /usr/local/lib/python3.10/dist-packages (from pyasn1-modules&gt;=0.2.1-&gt;google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 6)) (0.5.0)
+Requirement already satisfied: oauthlib&gt;=3.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-oauthlib&gt;=0.7.0-&gt;google-auth-oauthlib&lt;1.1,&gt;=0.5-&gt;tensorboard-&gt;-r requirements.txt (line 6)) (3.2.2)
+Requirement already satisfied: mpmath&gt;=0.19 in /usr/local/lib/python3.10/dist-packages (from sympy-&gt;torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (1.3.0)
+Installing collected packages: tokenizers, xxhash, ftfy, dill, multiprocess, transformers, datasets, accelerate
+Successfully installed accelerate-0.21.0 datasets-2.14.1 dill-0.3.7 ftfy-6.1.1 multiprocess-0.70.15 tokenizers-0.13.3 transformers-4.31.0 xxhash-3.2.0
+</pre></div>
+</div>
+</div>
+</div>
+<p>今回は <a class="reference external" href="https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions" rel="noreferrer" target="_blank">Pokémon BLIP captions</a> を用いて <code class="docutils literal notranslate"><span class="pre">stable-diffusion-v1-5</span></code> を微調整して、自分だけのポケモンを生成してみましょう。</p>
+<p>LoRA チューニングが可能なスクリプトを実行する際に使用する環境変数を以下のように準備しておきます:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MODEL_NAME</span></code> には今回使用する <code class="docutils literal notranslate"><span class="pre">stable-diffusion-v1-5</span></code> を設定</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">DATASET_NAME</span></code> には今回学習させる <code class="docutils literal notranslate"><span class="pre">lambdalabs/pokemon-blip-captions</span></code> を設定</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OUTPUT_DIR</span></code> には学習結果をどこに保存するかを設定</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">env</span> MODEL_NAME=runwayml/stable-diffusion-v1-5
+<span class="o">%</span><span class="k">env</span> DATASET_NAME=lambdalabs/pokemon-blip-captions
+<span class="o">%</span><span class="k">env</span> OUTPUT_DIR=/sddata/finetune/lora/pokemon
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>env: MODEL_NAME=runwayml/stable-diffusion-v1-5
+env: DATASET_NAME=lambdalabs/pokemon-blip-captions
+env: OUTPUT_DIR=/sddata/finetune/lora/pokemon
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="lora">
+<h3>LoRA チューニングの実施<a class="headerlink" href="#lora" title="Permalink to this heading">#</a></h3>
+<p>これで LoRA チューニングを開始する準備ができました。スクリプトには以下のように複数のオプションを指定することが出来ますが、いくつか注意すべきオプションがあります:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--max_train_steps</span></code>: 学習回数を指定するオプションです。デフォルトでは 15,000 に設定されていますが、Colab で実行すると約 6 時間程度訓練に時間がかかります。今回の実習では動作確認のために 10 を設定します</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--learing_rate</span></code>: LoRA では比較的高めの学習率を設定可能です。デフォルトでは <code class="docutils literal notranslate"><span class="pre">1e-4</span></code> が設定されていますが、通常の微調整では <code class="docutils literal notranslate"><span class="pre">1e-5</span> <span class="pre">~</span> <span class="pre">1e-6</span></code> を使うことが多いでしょう</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!accelerate launch --mixed_precision=&quot;fp16&quot; train_text_to_image_lora.py \
+  --pretrained_model_name_or_path=&quot;${MODEL_NAME}&quot; \
+  --dataset_name=&quot;${DATASET_NAME}&quot; \
+  --dataloader_num_workers=8 \
+  --resolution=512 \
+  --center_crop \
+  --random_flip \
+  --train_batch_size=1 \
+  --gradient_accumulation_steps=4 \
+  --max_train_steps=10 \
+  --learning_rate=1e-04 \
+  --max_grad_norm=1 \
+  --lr_scheduler=&quot;cosine&quot; \
+  --lr_warmup_steps=0 \
+  --output_dir=&quot;${OUTPUT_DIR}&quot; \
+  --checkpointing_steps=500 \
+  --validation_prompt=&quot;A pokemon with blue eyes.&quot; \
+  --seed=1337
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-07-29 02:57:29.853137: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+The following values were not passed to `accelerate launch` and had defaults used instead:
+	`--num_processes` was set to a value of `1`
+	`--num_machines` was set to a value of `1`
+	`--dynamo_backend` was set to a value of `&#39;no&#39;`
+To avoid this warning pass in values for each of the problematic parameters or run `accelerate config`.
+2023-07-29 02:57:35.909420: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+07/29/2023 02:57:38 - INFO - __main__ - Distributed environment: NO
+Num processes: 1
+Process index: 0
+Local process index: 0
+Device: cuda
+
+Mixed precision type: fp16
+
+Downloading (…)cheduler_config.json: 100% 308/308 [00:00&lt;00:00, 1.71MB/s]
+{&#39;clip_sample_range&#39;, &#39;thresholding&#39;, &#39;variance_type&#39;, &#39;sample_max_value&#39;, &#39;prediction_type&#39;, &#39;dynamic_thresholding_ratio&#39;, &#39;timestep_spacing&#39;} was not found in config. Values will be initialized to default values.
+Downloading (…)tokenizer/vocab.json: 100% 1.06M/1.06M [00:00&lt;00:00, 16.4MB/s]
+Downloading (…)tokenizer/merges.txt: 100% 525k/525k [00:00&lt;00:00, 38.6MB/s]
+Downloading (…)cial_tokens_map.json: 100% 472/472 [00:00&lt;00:00, 2.39MB/s]
+Downloading (…)okenizer_config.json: 100% 806/806 [00:00&lt;00:00, 4.48MB/s]
+Downloading (…)_encoder/config.json: 100% 617/617 [00:00&lt;00:00, 3.23MB/s]
+Downloading model.safetensors: 100% 492M/492M [00:03&lt;00:00, 132MB/s]
+Downloading (…)main/vae/config.json: 100% 547/547 [00:00&lt;00:00, 3.33MB/s]
+Downloading (…)ch_model.safetensors: 100% 335M/335M [00:02&lt;00:00, 122MB/s]
+{&#39;scaling_factor&#39;, &#39;force_upcast&#39;} was not found in config. Values will be initialized to default values.
+Downloading (…)ain/unet/config.json: 100% 743/743 [00:00&lt;00:00, 4.56MB/s]
+Downloading (…)ch_model.safetensors: 100% 3.44G/3.44G [00:34&lt;00:00, 98.3MB/s]
+{&#39;mid_block_only_cross_attention&#39;, &#39;cross_attention_norm&#39;, &#39;class_embed_type&#39;, &#39;class_embeddings_concat&#39;, &#39;resnet_time_scale_shift&#39;, &#39;resnet_out_scale_factor&#39;, &#39;use_linear_projection&#39;, &#39;time_embedding_dim&#39;, &#39;timestep_post_act&#39;, &#39;only_cross_attention&#39;, &#39;projection_class_embeddings_input_dim&#39;, &#39;num_attention_heads&#39;, &#39;mid_block_type&#39;, &#39;encoder_hid_dim_type&#39;, &#39;addition_embed_type&#39;, &#39;time_embedding_act_fn&#39;, &#39;upcast_attention&#39;, &#39;time_embedding_type&#39;, &#39;transformer_layers_per_block&#39;, &#39;conv_in_kernel&#39;, &#39;dual_cross_attention&#39;, &#39;resnet_skip_time_act&#39;, &#39;conv_out_kernel&#39;, &#39;addition_embed_type_num_heads&#39;, &#39;time_cond_proj_dim&#39;, &#39;num_class_embeds&#39;, &#39;addition_time_embed_dim&#39;, &#39;encoder_hid_dim&#39;} was not found in config. Values will be initialized to default values.
+Downloading readme: 100% 1.80k/1.80k [00:00&lt;00:00, 12.5MB/s]
+Downloading metadata: 100% 731/731 [00:00&lt;00:00, 4.06MB/s]
+Downloading data files:   0% 0/1 [00:00&lt;?, ?it/s]
+Downloading data:   0% 0.00/99.7M [00:00&lt;?, ?B/s]
+Downloading data:   4% 4.19M/99.7M [00:00&lt;00:07, 12.9MB/s]
+Downloading data:  13% 12.6M/99.7M [00:00&lt;00:02, 33.0MB/s]
+Downloading data:  21% 21.0M/99.7M [00:00&lt;00:01, 46.3MB/s]
+Downloading data:  29% 29.4M/99.7M [00:00&lt;00:01, 54.9MB/s]
+Downloading data:  38% 37.7M/99.7M [00:00&lt;00:01, 60.4MB/s]
+Downloading data:  46% 46.1M/99.7M [00:00&lt;00:00, 64.8MB/s]
+Downloading data:  55% 54.5M/99.7M [00:01&lt;00:00, 66.1MB/s]
+Downloading data:  63% 62.9M/99.7M [00:01&lt;00:00, 68.0MB/s]
+Downloading data:  72% 71.3M/99.7M [00:01&lt;00:00, 69.3MB/s]
+Downloading data:  80% 79.7M/99.7M [00:01&lt;00:00, 70.0MB/s]
+Downloading data:  88% 88.1M/99.7M [00:01&lt;00:00, 70.1MB/s]
+Downloading data: 100% 99.7M/99.7M [00:01&lt;00:00, 61.5MB/s]
+Downloading data files: 100% 1/1 [00:01&lt;00:00,  1.62s/it]
+Extracting data files: 100% 1/1 [00:00&lt;00:00, 1090.00it/s]
+Generating train split: 100% 833/833 [00:01&lt;00:00, 824.49 examples/s]
+/usr/local/lib/python3.10/dist-packages/torch/utils/data/dataloader.py:560: UserWarning: This DataLoader will create 8 worker processes in total. Our suggested max number of worker in current system is 2, which is smaller than what this DataLoader is going to create. Please be aware that excessive worker creation might get DataLoader running slow or even freeze, lower the worker number to avoid potential slowness/freeze if necessary.
+  warnings.warn(_create_warning_msg(
+07/29/2023 02:58:59 - INFO - __main__ - ***** Running training *****
+07/29/2023 02:58:59 - INFO - __main__ -   Num examples = 833
+07/29/2023 02:58:59 - INFO - __main__ -   Num Epochs = 1
+07/29/2023 02:58:59 - INFO - __main__ -   Instantaneous batch size per device = 1
+07/29/2023 02:58:59 - INFO - __main__ -   Total train batch size (w. parallel, distributed &amp; accumulation) = 4
+07/29/2023 02:58:59 - INFO - __main__ -   Gradient Accumulation steps = 4
+07/29/2023 02:58:59 - INFO - __main__ -   Total optimization steps = 10
+Steps: 100% 10/10 [00:25&lt;00:00,  1.65s/it, lr=0, step_loss=0.00373]      07/29/2023 02:59:25 - INFO - __main__ - Running validation... 
+ Generating 4 images with prompt: A pokemon with blue eyes..
+
+Downloading (…)ain/model_index.json: 100% 541/541 [00:00&lt;00:00, 2.57MB/s]
+
+Fetching 13 files:   0% 0/13 [00:00&lt;?, ?it/s]
+
+Downloading (…)rocessor_config.json: 100% 342/342 [00:00&lt;00:00, 2.18MB/s]
+
+Fetching 13 files:   8% 1/13 [00:00&lt;00:04,  2.51it/s]
+
+Downloading (…)_checker/config.json: 100% 4.72k/4.72k [00:00&lt;00:00, 13.5MB/s]
+
+
+Downloading model.safetensors:   0% 0.00/1.22G [00:00&lt;?, ?B/s]
+
+Downloading model.safetensors:   2% 21.0M/1.22G [00:00&lt;00:08, 141MB/s]
+
+Downloading model.safetensors:   4% 52.4M/1.22G [00:00&lt;00:06, 191MB/s]
+
+Downloading model.safetensors:   7% 83.9M/1.22G [00:00&lt;00:05, 202MB/s]
+
+Downloading model.safetensors:   9% 105M/1.22G [00:00&lt;00:05, 200MB/s] 
+
+Downloading model.safetensors:  10% 126M/1.22G [00:00&lt;00:05, 199MB/s]
+
+Downloading model.safetensors:  13% 157M/1.22G [00:00&lt;00:05, 203MB/s]
+
+Downloading model.safetensors:  16% 189M/1.22G [00:00&lt;00:04, 206MB/s]
+
+Downloading model.safetensors:  17% 210M/1.22G [00:01&lt;00:04, 202MB/s]
+
+Downloading model.safetensors:  19% 231M/1.22G [00:01&lt;00:04, 204MB/s]
+
+Downloading model.safetensors:  21% 252M/1.22G [00:01&lt;00:04, 204MB/s]
+
+Downloading model.safetensors:  22% 273M/1.22G [00:01&lt;00:04, 205MB/s]
+
+Downloading model.safetensors:  24% 294M/1.22G [00:01&lt;00:04, 203MB/s]
+
+Downloading model.safetensors:  26% 315M/1.22G [00:01&lt;00:04, 195MB/s]
+
+Downloading model.safetensors:  28% 336M/1.22G [00:01&lt;00:04, 193MB/s]
+
+Downloading model.safetensors:  29% 357M/1.22G [00:01&lt;00:04, 186MB/s]
+
+Downloading model.safetensors:  31% 377M/1.22G [00:01&lt;00:04, 182MB/s]
+
+Downloading model.safetensors:  33% 398M/1.22G [00:02&lt;00:04, 186MB/s]
+
+Downloading model.safetensors:  34% 419M/1.22G [00:03&lt;00:23, 34.4MB/s]
+
+Downloading model.safetensors:  36% 440M/1.22G [00:04&lt;00:17, 43.1MB/s]
+
+Downloading model.safetensors:  38% 461M/1.22G [00:04&lt;00:13, 54.6MB/s]
+
+Downloading model.safetensors:  40% 482M/1.22G [00:04&lt;00:11, 65.0MB/s]
+
+Downloading model.safetensors:  41% 503M/1.22G [00:04&lt;00:09, 77.9MB/s]
+
+Downloading model.safetensors:  43% 524M/1.22G [00:04&lt;00:07, 95.5MB/s]
+
+Downloading model.safetensors:  45% 545M/1.22G [00:04&lt;00:06, 111MB/s] 
+
+Downloading model.safetensors:  47% 566M/1.22G [00:04&lt;00:05, 126MB/s]
+
+Downloading model.safetensors:  48% 587M/1.22G [00:04&lt;00:04, 140MB/s]
+
+Downloading model.safetensors:  50% 608M/1.22G [00:05&lt;00:04, 152MB/s]
+
+Downloading model.safetensors:  52% 629M/1.22G [00:05&lt;00:05, 112MB/s]
+
+Downloading model.safetensors:  53% 650M/1.22G [00:05&lt;00:04, 124MB/s]
+
+Downloading model.safetensors:  55% 671M/1.22G [00:05&lt;00:04, 135MB/s]
+
+Downloading model.safetensors:  57% 692M/1.22G [00:05&lt;00:03, 146MB/s]
+
+Downloading model.safetensors:  59% 713M/1.22G [00:05&lt;00:03, 153MB/s]
+
+Downloading model.safetensors:  61% 744M/1.22G [00:05&lt;00:02, 172MB/s]
+
+Downloading model.safetensors:  63% 765M/1.22G [00:06&lt;00:02, 179MB/s]
+
+Downloading model.safetensors:  66% 797M/1.22G [00:06&lt;00:02, 189MB/s]
+
+Downloading model.safetensors:  67% 818M/1.22G [00:06&lt;00:02, 194MB/s]
+
+Downloading model.safetensors:  70% 849M/1.22G [00:06&lt;00:01, 191MB/s]
+
+Downloading model.safetensors:  72% 870M/1.22G [00:06&lt;00:01, 188MB/s]
+
+Downloading model.safetensors:  73% 891M/1.22G [00:06&lt;00:01, 190MB/s]
+
+Downloading model.safetensors:  76% 923M/1.22G [00:08&lt;00:06, 43.7MB/s]
+
+Downloading model.safetensors:  78% 944M/1.22G [00:10&lt;00:11, 24.0MB/s]
+
+Downloading model.safetensors:  79% 965M/1.22G [00:10&lt;00:08, 30.4MB/s]
+
+Downloading model.safetensors:  80% 975M/1.22G [00:10&lt;00:07, 33.8MB/s]
+
+Downloading model.safetensors:  82% 996M/1.22G [00:10&lt;00:04, 45.0MB/s]
+
+Downloading model.safetensors:  85% 1.03G/1.22G [00:11&lt;00:02, 66.1MB/s]
+
+Downloading model.safetensors:  86% 1.05G/1.22G [00:11&lt;00:02, 78.0MB/s]
+
+Downloading model.safetensors:  89% 1.08G/1.22G [00:11&lt;00:01, 103MB/s] 
+
+Downloading model.safetensors:  91% 1.11G/1.22G [00:11&lt;00:00, 126MB/s]
+
+Downloading model.safetensors:  94% 1.14G/1.22G [00:11&lt;00:00, 146MB/s]
+
+Downloading model.safetensors:  97% 1.17G/1.22G [00:11&lt;00:00, 161MB/s]
+
+Downloading model.safetensors:  98% 1.20G/1.22G [00:11&lt;00:00, 167MB/s]
+
+Downloading model.safetensors: 100% 1.22G/1.22G [00:11&lt;00:00, 101MB/s]
+
+Fetching 13 files: 100% 13/13 [00:12&lt;00:00,  1.04it/s]
+{&#39;requires_safety_checker&#39;} was not found in config. Values will be initialized to default values.
+
+Loading pipeline components...:   0% 0/7 [00:00&lt;?, ?it/s]{&#39;scaling_factor&#39;, &#39;force_upcast&#39;} was not found in config. Values will be initialized to default values.
+Loaded vae as AutoencoderKL from `vae` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  29% 2/7 [00:00&lt;00:00,  5.70it/s]`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+Loaded safety_checker as StableDiffusionSafetyChecker from `safety_checker` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  43% 3/7 [00:01&lt;00:02,  1.66it/s]Loaded tokenizer as CLIPTokenizer from `tokenizer` subfolder of runwayml/stable-diffusion-v1-5.
+Loaded text_encoder as CLIPTextModel from `text_encoder` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  71% 5/7 [00:04&lt;00:02,  1.17s/it]Loaded feature_extractor as CLIPImageProcessor from `feature_extractor` subfolder of runwayml/stable-diffusion-v1-5.
+{&#39;prediction_type&#39;, &#39;timestep_spacing&#39;} was not found in config. Values will be initialized to default values.
+Loaded scheduler as PNDMScheduler from `scheduler` subfolder of runwayml/stable-diffusion-v1-5.
+Loading pipeline components...: 100% 7/7 [00:04&lt;00:00,  1.43it/s]
+Potential NSFW content was detected in one or more images. A black image will be returned instead. Try again with a different prompt and/or seed.
+Model weights saved in /sddata/finetune/lora/pokemon/pytorch_lora_weights.bin
+{&#39;requires_safety_checker&#39;} was not found in config. Values will be initialized to default values.
+
+Loading pipeline components...:   0% 0/7 [00:00&lt;?, ?it/s]{&#39;mid_block_only_cross_attention&#39;, &#39;cross_attention_norm&#39;, &#39;class_embed_type&#39;, &#39;class_embeddings_concat&#39;, &#39;resnet_time_scale_shift&#39;, &#39;resnet_out_scale_factor&#39;, &#39;use_linear_projection&#39;, &#39;time_embedding_dim&#39;, &#39;timestep_post_act&#39;, &#39;only_cross_attention&#39;, &#39;projection_class_embeddings_input_dim&#39;, &#39;num_attention_heads&#39;, &#39;mid_block_type&#39;, &#39;encoder_hid_dim_type&#39;, &#39;addition_embed_type&#39;, &#39;time_embedding_act_fn&#39;, &#39;upcast_attention&#39;, &#39;time_embedding_type&#39;, &#39;transformer_layers_per_block&#39;, &#39;conv_in_kernel&#39;, &#39;dual_cross_attention&#39;, &#39;resnet_skip_time_act&#39;, &#39;conv_out_kernel&#39;, &#39;addition_embed_type_num_heads&#39;, &#39;time_cond_proj_dim&#39;, &#39;num_class_embeds&#39;, &#39;addition_time_embed_dim&#39;, &#39;encoder_hid_dim&#39;} was not found in config. Values will be initialized to default values.
+Loaded unet as UNet2DConditionModel from `unet` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  14% 1/7 [00:15&lt;01:34, 15.83s/it]{&#39;scaling_factor&#39;, &#39;force_upcast&#39;} was not found in config. Values will be initialized to default values.
+Loaded vae as AutoencoderKL from `vae` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  29% 2/7 [00:16&lt;00:33,  6.70s/it]`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+Loaded safety_checker as StableDiffusionSafetyChecker from `safety_checker` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  43% 3/7 [00:23&lt;00:27,  6.96s/it]Loaded tokenizer as CLIPTokenizer from `tokenizer` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  57% 4/7 [00:23&lt;00:12,  4.27s/it]Loaded text_encoder as CLIPTextModel from `text_encoder` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  71% 5/7 [00:26&lt;00:07,  3.85s/it]Loaded feature_extractor as CLIPImageProcessor from `feature_extractor` subfolder of runwayml/stable-diffusion-v1-5.
+{&#39;prediction_type&#39;, &#39;timestep_spacing&#39;} was not found in config. Values will be initialized to default values.
+Loaded scheduler as PNDMScheduler from `scheduler` subfolder of runwayml/stable-diffusion-v1-5.
+Loading pipeline components...: 100% 7/7 [00:26&lt;00:00,  3.81s/it]
+
+  0% 0/30 [00:00&lt;?, ?it/s]
+  3% 1/30 [00:00&lt;00:10,  2.67it/s]
+  7% 2/30 [00:00&lt;00:06,  4.14it/s]
+ 10% 3/30 [00:00&lt;00:05,  5.02it/s]
+ 13% 4/30 [00:00&lt;00:04,  5.57it/s]
+ 17% 5/30 [00:00&lt;00:04,  5.95it/s]
+ 20% 6/30 [00:01&lt;00:03,  6.11it/s]
+ 23% 7/30 [00:01&lt;00:03,  6.24it/s]
+ 27% 8/30 [00:01&lt;00:03,  6.37it/s]
+ 30% 9/30 [00:01&lt;00:03,  6.47it/s]
+ 33% 10/30 [00:01&lt;00:03,  6.53it/s]
+ 37% 11/30 [00:01&lt;00:02,  6.58it/s]
+ 40% 12/30 [00:02&lt;00:02,  6.61it/s]
+ 43% 13/30 [00:02&lt;00:02,  6.60it/s]
+ 47% 14/30 [00:02&lt;00:02,  6.59it/s]
+ 50% 15/30 [00:02&lt;00:02,  6.61it/s]
+ 53% 16/30 [00:02&lt;00:02,  6.62it/s]
+ 57% 17/30 [00:02&lt;00:01,  6.64it/s]
+ 60% 18/30 [00:02&lt;00:01,  6.65it/s]
+ 63% 19/30 [00:03&lt;00:01,  6.64it/s]
+ 67% 20/30 [00:03&lt;00:01,  6.62it/s]
+ 70% 21/30 [00:03&lt;00:01,  6.62it/s]
+ 73% 22/30 [00:03&lt;00:01,  6.62it/s]
+ 77% 23/30 [00:03&lt;00:01,  6.62it/s]
+ 80% 24/30 [00:03&lt;00:00,  6.63it/s]
+ 83% 25/30 [00:03&lt;00:00,  6.63it/s]
+ 87% 26/30 [00:04&lt;00:00,  6.62it/s]
+ 90% 27/30 [00:04&lt;00:00,  6.59it/s]
+ 93% 28/30 [00:04&lt;00:00,  6.60it/s]
+ 97% 29/30 [00:04&lt;00:00,  6.61it/s]
+100% 30/30 [00:04&lt;00:00,  6.32it/s]
+
+  0% 0/30 [00:00&lt;?, ?it/s]
+  3% 1/30 [00:00&lt;00:08,  3.40it/s]
+  7% 2/30 [00:00&lt;00:05,  4.77it/s]
+ 10% 3/30 [00:00&lt;00:04,  5.47it/s]
+ 13% 4/30 [00:00&lt;00:04,  5.88it/s]
+ 17% 5/30 [00:00&lt;00:04,  6.05it/s]
+ 20% 6/30 [00:01&lt;00:03,  6.20it/s]
+ 23% 7/30 [00:01&lt;00:03,  6.33it/s]
+ 27% 8/30 [00:01&lt;00:03,  6.41it/s]
+ 30% 9/30 [00:01&lt;00:03,  6.47it/s]
+ 33% 10/30 [00:01&lt;00:03,  6.50it/s]
+ 37% 11/30 [00:01&lt;00:02,  6.52it/s]
+ 40% 12/30 [00:01&lt;00:02,  6.51it/s]
+ 43% 13/30 [00:02&lt;00:02,  6.51it/s]
+ 47% 14/30 [00:02&lt;00:02,  6.53it/s]
+ 50% 15/30 [00:02&lt;00:02,  6.55it/s]
+ 53% 16/30 [00:02&lt;00:02,  6.56it/s]
+ 57% 17/30 [00:02&lt;00:01,  6.57it/s]
+ 60% 18/30 [00:02&lt;00:01,  6.56it/s]
+ 63% 19/30 [00:03&lt;00:01,  6.54it/s]
+ 67% 20/30 [00:03&lt;00:01,  6.55it/s]
+ 70% 21/30 [00:03&lt;00:01,  6.54it/s]
+ 73% 22/30 [00:03&lt;00:01,  6.53it/s]
+ 77% 23/30 [00:03&lt;00:01,  6.56it/s]
+ 80% 24/30 [00:03&lt;00:00,  6.55it/s]
+ 83% 25/30 [00:03&lt;00:00,  6.55it/s]
+ 87% 26/30 [00:04&lt;00:00,  6.54it/s]
+ 90% 27/30 [00:04&lt;00:00,  6.57it/s]
+ 93% 28/30 [00:04&lt;00:00,  6.55it/s]
+ 97% 29/30 [00:04&lt;00:00,  6.55it/s]
+100% 30/30 [00:04&lt;00:00,  6.36it/s]
+
+  0% 0/30 [00:00&lt;?, ?it/s]
+  3% 1/30 [00:00&lt;00:08,  3.37it/s]
+  7% 2/30 [00:00&lt;00:05,  4.73it/s]
+ 10% 3/30 [00:00&lt;00:04,  5.46it/s]
+ 13% 4/30 [00:00&lt;00:04,  5.90it/s]
+ 17% 5/30 [00:00&lt;00:04,  6.12it/s]
+ 20% 6/30 [00:01&lt;00:03,  6.15it/s]
+ 23% 7/30 [00:01&lt;00:03,  6.30it/s]
+ 27% 8/30 [00:01&lt;00:03,  6.38it/s]
+ 30% 9/30 [00:01&lt;00:03,  6.43it/s]
+ 33% 10/30 [00:01&lt;00:03,  6.48it/s]
+ 37% 11/30 [00:01&lt;00:02,  6.52it/s]
+ 40% 12/30 [00:01&lt;00:02,  6.51it/s]
+ 43% 13/30 [00:02&lt;00:02,  6.51it/s]
+ 47% 14/30 [00:02&lt;00:02,  6.52it/s]
+ 50% 15/30 [00:02&lt;00:02,  6.53it/s]
+ 53% 16/30 [00:02&lt;00:02,  6.53it/s]
+ 57% 17/30 [00:02&lt;00:01,  6.51it/s]
+ 60% 18/30 [00:02&lt;00:01,  6.51it/s]
+ 63% 19/30 [00:03&lt;00:01,  6.53it/s]
+ 67% 20/30 [00:03&lt;00:01,  6.55it/s]
+ 70% 21/30 [00:03&lt;00:01,  6.55it/s]
+ 73% 22/30 [00:03&lt;00:01,  6.56it/s]
+ 77% 23/30 [00:03&lt;00:01,  6.57it/s]
+ 80% 24/30 [00:03&lt;00:00,  6.56it/s]
+ 83% 25/30 [00:03&lt;00:00,  6.56it/s]
+ 87% 26/30 [00:04&lt;00:00,  6.54it/s]
+ 90% 27/30 [00:04&lt;00:00,  6.53it/s]
+ 93% 28/30 [00:04&lt;00:00,  6.51it/s]
+ 97% 29/30 [00:04&lt;00:00,  6.52it/s]
+100% 30/30 [00:04&lt;00:00,  6.35it/s]
+
+  0% 0/30 [00:00&lt;?, ?it/s]
+  3% 1/30 [00:00&lt;00:08,  3.38it/s]
+  7% 2/30 [00:00&lt;00:05,  4.75it/s]
+ 10% 3/30 [00:00&lt;00:04,  5.44it/s]
+ 13% 4/30 [00:00&lt;00:04,  5.83it/s]
+ 17% 5/30 [00:00&lt;00:04,  5.91it/s]
+ 20% 6/30 [00:01&lt;00:03,  6.09it/s]
+ 23% 7/30 [00:01&lt;00:03,  6.22it/s]
+ 27% 8/30 [00:01&lt;00:03,  6.32it/s]
+ 30% 9/30 [00:01&lt;00:03,  6.39it/s]
+ 33% 10/30 [00:01&lt;00:03,  6.43it/s]
+ 37% 11/30 [00:01&lt;00:02,  6.44it/s]
+ 40% 12/30 [00:01&lt;00:02,  6.38it/s]
+ 43% 13/30 [00:02&lt;00:02,  6.40it/s]
+ 47% 14/30 [00:02&lt;00:02,  6.46it/s]
+ 50% 15/30 [00:02&lt;00:02,  6.47it/s]
+ 53% 16/30 [00:02&lt;00:02,  6.48it/s]
+ 57% 17/30 [00:02&lt;00:02,  6.48it/s]
+ 60% 18/30 [00:02&lt;00:01,  6.48it/s]
+ 63% 19/30 [00:03&lt;00:01,  6.46it/s]
+ 67% 20/30 [00:03&lt;00:01,  6.45it/s]
+ 70% 21/30 [00:03&lt;00:01,  6.46it/s]
+ 73% 22/30 [00:03&lt;00:01,  6.50it/s]
+ 77% 23/30 [00:03&lt;00:01,  6.48it/s]
+ 80% 24/30 [00:03&lt;00:00,  6.48it/s]
+ 83% 25/30 [00:04&lt;00:00,  6.45it/s]
+ 87% 26/30 [00:04&lt;00:00,  6.45it/s]
+ 90% 27/30 [00:04&lt;00:00,  6.44it/s]
+ 93% 28/30 [00:04&lt;00:00,  6.44it/s]
+ 97% 29/30 [00:04&lt;00:00,  6.47it/s]
+100% 30/30 [00:04&lt;00:00,  6.28it/s]
+Potential NSFW content was detected in one or more images. A black image will be returned instead. Try again with a different prompt and/or seed.
+Steps: 100% 10/10 [02:00&lt;00:00, 12.03s/it, lr=0, step_loss=0.00373]
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h3>LoRA チューニング結果を元にした推論<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
+<p>上記で学習した結果を元に、<code class="docutils literal notranslate"><span class="pre">StableDiffusionPipeline</span></code> でベースとなるモデル (<code class="docutils literal notranslate"><span class="pre">runwayml/stable-diffusion-v1-5</span></code>) を読み込み、<code class="docutils literal notranslate"><span class="pre">DPMSolverMultistepScheduler</span></code> で推論できるように準備します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">StableDiffusionPipeline</span><span class="p">,</span> <span class="n">DPMSolverMultistepScheduler</span>
+
+<span class="n">model_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;MODEL_NAME&quot;</span><span class="p">]</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_base</span><span class="p">,</span> <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">scheduler</span> <span class="o">=</span> <span class="n">DPMSolverMultistepScheduler</span><span class="o">.</span><span class="n">from_config</span><span class="p">(</span><span class="n">pipe</span><span class="o">.</span><span class="n">scheduler</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "281d9b632f594e16af7443e13919242f"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+</pre></div>
+</div>
+</div>
+</div>
+<p>ベースモデルの重みの上に微調整した LoRA モジュールを <code class="docutils literal notranslate"><span class="pre">unet</span></code> の <code class="docutils literal notranslate"><span class="pre">load_attn_procs</span></code> 関数で読み込み、パイプラインを GPU へ移動して推論を高速化します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lora_model_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OUTPUT_DIR&quot;</span><span class="p">]</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">unet</span><span class="o">.</span><span class="n">load_attn_procs</span><span class="p">(</span><span class="n">lora_model_path</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>パイプラインを用いた推論時に、以下のように <code class="docutils literal notranslate"><span class="pre">cross_attention_kwargs</span></code> オプションで <code class="docutils literal notranslate"><span class="pre">scale</span></code> パラメータを設定することが可能です。このパラメータにより、LoRA モジュールの影響度合いを制御することが可能です。</p>
+<p>ここで、scale 値が 0 のときは LoRA モジュールを使用せずオリジナルのベースモデルの重みのみを使用するのと同じです。逆に scale 値が 1 のときは LoRA モジュールのみを使用することを意味します。scale 値は 0 ~ 1 の間で 2 つの重みを補完します。</p>
+<p>時間の関係上、上記の LoRA チューニングでは十分な学習ができていないためここでは画像生成結果をお見しておりません。ただ、以下のようにしてコードを実行することで LoRA チューニングによって獲得された自分だけのポケモンの画像が生成できるようになります。</p>
+<p>以下は、LoRA モジュールの重みの半分と、ベースモデルの重みの半分を使用する例です:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;A pokemon with blue eyes.&quot;</span><span class="p">,</span>
+    <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">7.5</span><span class="p">,</span>
+    <span class="n">cross_attention_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>以下は、LoRA モジュールによる重みをすべて使用する例です:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;A pokemon with blue eyes.&quot;</span><span class="p">,</span>
+    <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">7.5</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>以下は上記で LoRA チューニングに使用した <a class="reference external" href="https://huggingface.co/datasets/lambdalabs/pokemon-blip-captions" rel="noreferrer" target="_blank">lambdalabs/pokemon-blip-captions</a> を十分に学習させた <a class="reference external" href="https://huggingface.co/sayakpaul/sd-model-finetuned-lora-t4" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">sayakpaul/sd-model-finetuned-lora-t4</span></code></a> による画像生成例です。</p>
+<p>LoRA モジュールのモデル ID から <code class="docutils literal notranslate"><span class="pre">RepoCard.load</span></code> を通じてモデル情報を読み込み、ベースモデルの情報を取得します。その後取得したベースモデルを読み込み、<code class="docutils literal notranslate"><span class="pre">load_attn_procs</span></code> で LoRA モジュールも読み込む流れになっています。あとはこれまでのパイプライン同様の生成の流れを踏みます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">huggingface_hub.repocard</span> <span class="kn">import</span> <span class="n">RepoCard</span>
+
+<span class="n">lora_model_id</span> <span class="o">=</span> <span class="s2">&quot;sayakpaul/sd-model-finetuned-lora-t4&quot;</span>
+<span class="n">card</span> <span class="o">=</span> <span class="n">RepoCard</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">lora_model_id</span><span class="p">)</span>
+<span class="n">base_model_id</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;base_model&quot;</span><span class="p">]</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">base_model_id</span><span class="p">,</span> <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">unet</span><span class="o">.</span><span class="n">load_attn_procs</span><span class="p">(</span><span class="n">lora_model_id</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+<span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+<span class="n">pipe</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="o">=</span><span class="s2">&quot;A pokemon with blue eyes.&quot;</span><span class="p">,</span>
+    <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">7.5</span><span class="p">,</span>
+    <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "bbc601848de74091a33d8a0dbeec0951"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "427589fee5b3403aaf7336ae24f39566"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "b03189d7febb41b0b813f37d9045c308"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "3763542026f84c3eb8354023d55af6ec"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "d56c242cb3c4453fa04c45fdcffc604d"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "393ef644581b499fbd3319a9076ff47f"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "6cac9f35b24e47118e767c41bac70f14"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "870982710cfc4ff6a7d35f228bb85794"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "d895362370c1421fba9d7b609b9b6d35"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "103302472cff479e893bab9d890304bd"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "225be82d57cc4b1c9e9d322d16cbda6d"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "82450a77f2314f04b59f0d17da3d6895"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "c1a25b37ecee477399b1c2bca0cd003d"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "ea9eca1a7eca47d0a8f4687ab5931d93"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "b263d7e5568247ee80d1c8e72dde65cd"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "15711dfb15d64b4da8ad4c47fc8d4f58"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f3a86467f1824efb8f39b986edfd7d7f"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "532ea2563c804ada871a63b755c31f84"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "906dfb0c1a7e47c49c6f1c14c871e2da"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "8623ccc890644f82bf8c781932bf7c35"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "bee20fe3c5634e4ca950028bed4a7a21"}</script><img alt="../_images/0c63f5d09ae449253008dc621cf21141bf6d63262cdfd8c50fb4f8cda490d2e7.png" src="../_images/0c63f5d09ae449253008dc621cf21141bf6d63262cdfd8c50fb4f8cda490d2e7.png" />
+</div>
+</div>
+</section>
+</section>
+<section id="dreambooth-lora">
+<h2>DreamBooth における LoRA チューニング<a class="headerlink" href="#dreambooth-lora" title="Permalink to this heading">#</a></h2>
+<p>DreamBooth <a class="reference external" href="https://arxiv.org/abs/2208.12242" rel="noreferrer" target="_blank">[Ruiz+ CVPR'23]</a> は Stable Diffusion のような Text2Image モデルを個人の趣向に合わせてパーソナライズするためのファインチューニング手法です。この手法は被写体の画像数枚から、異なるコンテキストにおける被写体の写実的な画像を生成可能な技術になっています。</p>
+<p>しかしながら DreamBooth はハイパーパラメータに非常に敏感で、過学習しやすい傾向にあります。考慮すべき重要なハイパーパラメータは学習時間（学習率・学習回数）、推論時間（拡散過程のステップ数・ノイズスケジューラの種類）に影響するものがあります。</p>
+<section id="id4">
+<h3>依存ライブラリのインストール<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h3>
+<p>本セクションでは <a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/train_dreambooth_lora.py" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">examples/dreambooth/train_dreambooth_lora.py</span></code></a> を使用して dreambooth モデルの LoRA チューニングを試します。ここでは、dreambooth で LoRA チューニングが可能なスクリプトで使用するライブラリを、対応する <a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/examples/dreambooth/requirements.txt" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">examples/dreambooth/requirements.txt</span></code></a>
+からインストールします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">cd</span> /content/diffusers/examples/dreambooth
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>bitsandbytes<span class="w"> </span>#<span class="w"> </span><span class="m">8</span>-bit<span class="w"> </span>Adam<span class="w"> </span>optimizer<span class="w"> </span>を使用するため
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/content/diffusers/examples/dreambooth
+Requirement already satisfied: accelerate&gt;=0.16.0 in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 1)) (0.21.0)
+Requirement already satisfied: torchvision in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 2)) (0.15.2+cu118)
+Requirement already satisfied: transformers&gt;=4.25.1 in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 3)) (4.31.0)
+Requirement already satisfied: ftfy in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 4)) (6.1.1)
+Requirement already satisfied: tensorboard in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 5)) (2.12.3)
+Requirement already satisfied: Jinja2 in /usr/local/lib/python3.10/dist-packages (from -r requirements.txt (line 6)) (3.1.2)
+Requirement already satisfied: numpy&gt;=1.17 in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (1.22.4)
+Requirement already satisfied: packaging&gt;=20.0 in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (23.1)
+Requirement already satisfied: psutil in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (5.9.5)
+Requirement already satisfied: pyyaml in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (6.0.1)
+Requirement already satisfied: torch&gt;=1.10.0 in /usr/local/lib/python3.10/dist-packages (from accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (2.0.1+cu118)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from torchvision-&gt;-r requirements.txt (line 2)) (2.27.1)
+Requirement already satisfied: pillow!=8.3.*,&gt;=5.3.0 in /usr/local/lib/python3.10/dist-packages (from torchvision-&gt;-r requirements.txt (line 2)) (9.4.0)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (3.12.2)
+Requirement already satisfied: typing-extensions in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (4.7.1)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (1.11.1)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (3.1)
+Requirement already satisfied: triton==2.0.0 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (2.0.0)
+Requirement already satisfied: cmake in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (3.25.2)
+Requirement already satisfied: lit in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (16.0.6)
+Requirement already satisfied: huggingface-hub&lt;1.0,&gt;=0.14.1 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (0.16.4)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (2022.10.31)
+Requirement already satisfied: tokenizers!=0.11.3,&lt;0.14,&gt;=0.11.1 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (0.13.3)
+Requirement already satisfied: safetensors&gt;=0.3.1 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (0.3.1)
+Requirement already satisfied: tqdm&gt;=4.27 in /usr/local/lib/python3.10/dist-packages (from transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (4.65.0)
+Requirement already satisfied: wcwidth&gt;=0.2.5 in /usr/local/lib/python3.10/dist-packages (from ftfy-&gt;-r requirements.txt (line 4)) (0.2.6)
+Requirement already satisfied: absl-py&gt;=0.4 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (1.4.0)
+Requirement already satisfied: grpcio&gt;=1.48.2 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (1.56.2)
+Requirement already satisfied: google-auth&lt;3,&gt;=1.6.3 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (2.17.3)
+Requirement already satisfied: google-auth-oauthlib&lt;1.1,&gt;=0.5 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (1.0.0)
+Requirement already satisfied: markdown&gt;=2.6.8 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (3.4.4)
+Requirement already satisfied: protobuf&gt;=3.19.6 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (3.20.3)
+Requirement already satisfied: setuptools&gt;=41.0.0 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (67.7.2)
+Requirement already satisfied: tensorboard-data-server&lt;0.8.0,&gt;=0.7.0 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (0.7.1)
+Requirement already satisfied: werkzeug&gt;=1.0.1 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (2.3.6)
+Requirement already satisfied: wheel&gt;=0.26 in /usr/local/lib/python3.10/dist-packages (from tensorboard-&gt;-r requirements.txt (line 5)) (0.41.0)
+Requirement already satisfied: MarkupSafe&gt;=2.0 in /usr/local/lib/python3.10/dist-packages (from Jinja2-&gt;-r requirements.txt (line 6)) (2.1.3)
+Requirement already satisfied: cachetools&lt;6.0,&gt;=2.0.0 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 5)) (5.3.1)
+Requirement already satisfied: pyasn1-modules&gt;=0.2.1 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 5)) (0.3.0)
+Requirement already satisfied: six&gt;=1.9.0 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 5)) (1.16.0)
+Requirement already satisfied: rsa&lt;5,&gt;=3.1.4 in /usr/local/lib/python3.10/dist-packages (from google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 5)) (4.9)
+Requirement already satisfied: requests-oauthlib&gt;=0.7.0 in /usr/local/lib/python3.10/dist-packages (from google-auth-oauthlib&lt;1.1,&gt;=0.5-&gt;tensorboard-&gt;-r requirements.txt (line 5)) (1.3.1)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&lt;1.0,&gt;=0.14.1-&gt;transformers&gt;=4.25.1-&gt;-r requirements.txt (line 3)) (2023.6.0)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;torchvision-&gt;-r requirements.txt (line 2)) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;torchvision-&gt;-r requirements.txt (line 2)) (2023.7.22)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;torchvision-&gt;-r requirements.txt (line 2)) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;torchvision-&gt;-r requirements.txt (line 2)) (3.4)
+Requirement already satisfied: pyasn1&lt;0.6.0,&gt;=0.4.6 in /usr/local/lib/python3.10/dist-packages (from pyasn1-modules&gt;=0.2.1-&gt;google-auth&lt;3,&gt;=1.6.3-&gt;tensorboard-&gt;-r requirements.txt (line 5)) (0.5.0)
+Requirement already satisfied: oauthlib&gt;=3.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-oauthlib&gt;=0.7.0-&gt;google-auth-oauthlib&lt;1.1,&gt;=0.5-&gt;tensorboard-&gt;-r requirements.txt (line 5)) (3.2.2)
+Requirement already satisfied: mpmath&gt;=0.19 in /usr/local/lib/python3.10/dist-packages (from sympy-&gt;torch&gt;=1.10.0-&gt;accelerate&gt;=0.16.0-&gt;-r requirements.txt (line 1)) (1.3.0)
+Collecting bitsandbytes
+  Downloading bitsandbytes-0.41.0-py3-none-any.whl (92.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">92.6/92.6 MB</span> <span class=" -Color -Color-Red">12.4 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hInstalling collected packages: bitsandbytes
+Successfully installed bitsandbytes-0.41.0
+</pre></div>
+</div>
+</div>
+</div>
+<p>今回は DreamBooth と LoRA を使って <a class="reference external" href="https://huggingface.co/datasets/diffusers/dog-example" rel="noreferrer" target="_blank">コーギー🐶の画像</a> を用いて <code class="docutils literal notranslate"><span class="pre">stable-diffusion-v1-5</span></code> を微調整してみましょう。</p>
+<p>LoRA チューニングが可能なスクリプトを実行する際に使用する環境変数を以下のように準備しておきます:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MODEL_NAME</span></code> には今回使用する <code class="docutils literal notranslate"><span class="pre">stable-diffusion-v1-5</span></code> を設定</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">INSTANCE_DIR</span></code> には今回学習させるコーギーの画像が保存されているディレクトリを設定</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">OUTPUT_DIR</span></code> には学習結果をどこに保存するかを設定</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">env</span> MODEL_NAME=runwayml/stable-diffusion-v1-5
+<span class="o">%</span><span class="k">env</span> INSTANCE_DIR=/sddata/instance-dir/
+<span class="o">%</span><span class="k">env</span> OUTPUT_DIR=/sddata/output-dir/
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>env: MODEL_NAME=runwayml/stable-diffusion-v1-5
+env: INSTANCE_DIR=/sddata/instance-dir/
+env: OUTPUT_DIR=/sddata/output-dir/
+</pre></div>
+</div>
+</div>
+</div>
+<p>以下を実行して <code class="docutils literal notranslate"><span class="pre">INSTANCE_DIR</span></code> に設定した場所に <a class="reference external" href="https://huggingface.co/datasets/diffusers/dog-example" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">diffusers/dog-example</span></code></a> から画像をダウンロードします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">diffusers.utils</span> <span class="kn">import</span> <span class="n">load_image</span>
+<span class="kn">from</span> <span class="nn">huggingface_hub</span> <span class="kn">import</span> <span class="n">snapshot_download</span>
+
+<span class="n">instance_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;INSTANCE_DIR&quot;</span><span class="p">]</span>
+
+<span class="n">snapshot_download</span><span class="p">(</span>
+    <span class="s2">&quot;diffusers/dog-example&quot;</span><span class="p">,</span>
+    <span class="n">local_dir</span><span class="o">=</span><span class="n">instance_dir</span><span class="p">,</span>
+    <span class="n">repo_type</span><span class="o">=</span><span class="s2">&quot;dataset&quot;</span><span class="p">,</span>
+    <span class="n">ignore_patterns</span><span class="o">=</span><span class="s2">&quot;.gitattributes&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">jpg_files</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">instance_dir</span><span class="p">)</span>
+<span class="n">dog_examples</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">load_image</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">instance_dir</span><span class="p">,</span> <span class="n">jpg_file</span><span class="p">))</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">jpg_file</span> <span class="ow">in</span> <span class="n">jpg_files</span>
+<span class="p">]</span>
+
+<span class="n">image_grid</span><span class="p">(</span><span class="n">dog_examples</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">dog_examples</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "d4f6295a8b944272aa2b9da3b12da059"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "fa08656de6b342c6a6789c9379120370"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "4c941e7c1e374986b169026ae88922d8"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "059a8993978e44d2ace3df6a01ca41c7"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "e7bbb4d8553d4d80bcc8912c9e9a4fa5"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "4cd862535f0b41b998ce8a0f210127e1"}</script><img alt="../_images/5dd6b2c678f9a00b9a937521662eb1c2497531b0b278318737aee36b71f767a5.png" src="../_images/5dd6b2c678f9a00b9a937521662eb1c2497531b0b278318737aee36b71f767a5.png" />
+</div>
+</div>
+</section>
+<section id="id5">
+<h3>LoRA チューニングの実施<a class="headerlink" href="#id5" title="Permalink to this heading">#</a></h3>
+<p>これで LoRA チューニングを開始する準備ができました。スクリプトには以下のように複数のオプションを指定することが出来ますが、いくつか注意すべきオプションがあります:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--max_train_steps</span></code>: 学習回数を指定するオプションです。デフォルトでは 500 に設定されていますが、Colab で実行すると約 6 時間程度訓練に時間がかかります。今回の実習では動作確認のために 10 を設定します</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--checkpointing_steps</span></code>: 学習途中のパラメータを保存するタイミングを指定するオプションです。デフォルトは 100 に設定されていますが、上記の <code class="docutils literal notranslate"><span class="pre">--max_train_steps</span></code> に合わせて 5 に変更しました</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--learing_rate</span></code>: LoRA では比較的高めの学習率を設定可能です。デフォルトでは <code class="docutils literal notranslate"><span class="pre">1e-4</span></code> が設定されていますが、通常の微調整では <code class="docutils literal notranslate"><span class="pre">1e-5</span> <span class="pre">~</span> <span class="pre">1e-6</span></code> を使うことが多いでしょう</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>!accelerate launch --mixed_precision=&quot;fp16&quot; train_dreambooth_lora.py \
+  --pretrained_model_name_or_path=&quot;${MODEL_NAME}&quot;  \
+  --instance_data_dir=&quot;${INSTANCE_DIR}&quot; \
+  --output_dir=&quot;${OUTPUT_DIR}&quot; \
+  --instance_prompt=&quot;a photo of sks dog&quot; \
+  --resolution=512 \
+  --train_batch_size=1 \
+  --gradient_accumulation_steps=1 \
+  --checkpointing_steps=5 \
+  --learning_rate=1e-4 \
+  --lr_scheduler=&quot;constant&quot; \
+  --lr_warmup_steps=0 \
+  --max_train_steps=10 \
+  --seed=&quot;0&quot; \
+  --use_8bit_adam
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>2023-07-29 03:16:10.102240: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+The following values were not passed to `accelerate launch` and had defaults used instead:
+	`--num_processes` was set to a value of `1`
+	`--num_machines` was set to a value of `1`
+	`--dynamo_backend` was set to a value of `&#39;no&#39;`
+To avoid this warning pass in values for each of the problematic parameters or run `accelerate config`.
+2023-07-29 03:16:18.325093: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+07/29/2023 03:16:22 - INFO - __main__ - Distributed environment: NO
+Num processes: 1
+Process index: 0
+Local process index: 0
+Device: cuda
+
+Mixed precision type: fp16
+
+You are using a model of type clip_text_model to instantiate a model of type . This is not supported for all configurations of models and can yield errors.
+{&#39;clip_sample_range&#39;, &#39;timestep_spacing&#39;, &#39;prediction_type&#39;, &#39;thresholding&#39;, &#39;dynamic_thresholding_ratio&#39;, &#39;sample_max_value&#39;, &#39;variance_type&#39;} was not found in config. Values will be initialized to default values.
+{&#39;force_upcast&#39;, &#39;scaling_factor&#39;} was not found in config. Values will be initialized to default values.
+{&#39;addition_embed_type_num_heads&#39;, &#39;num_attention_heads&#39;, &#39;time_embedding_type&#39;, &#39;class_embeddings_concat&#39;, &#39;addition_time_embed_dim&#39;, &#39;use_linear_projection&#39;, &#39;resnet_time_scale_shift&#39;, &#39;cross_attention_norm&#39;, &#39;num_class_embeds&#39;, &#39;mid_block_only_cross_attention&#39;, &#39;addition_embed_type&#39;, &#39;dual_cross_attention&#39;, &#39;mid_block_type&#39;, &#39;time_embedding_dim&#39;, &#39;encoder_hid_dim&#39;, &#39;class_embed_type&#39;, &#39;encoder_hid_dim_type&#39;, &#39;upcast_attention&#39;, &#39;time_cond_proj_dim&#39;, &#39;resnet_skip_time_act&#39;, &#39;resnet_out_scale_factor&#39;, &#39;only_cross_attention&#39;, &#39;projection_class_embeddings_input_dim&#39;, &#39;conv_in_kernel&#39;, &#39;transformer_layers_per_block&#39;, &#39;timestep_post_act&#39;, &#39;conv_out_kernel&#39;, &#39;time_embedding_act_fn&#39;} was not found in config. Values will be initialized to default values.
+07/29/2023 03:16:46 - INFO - __main__ - ***** Running training *****
+07/29/2023 03:16:46 - INFO - __main__ -   Num examples = 5
+07/29/2023 03:16:46 - INFO - __main__ -   Num batches each epoch = 5
+07/29/2023 03:16:46 - INFO - __main__ -   Num Epochs = 2
+07/29/2023 03:16:46 - INFO - __main__ -   Instantaneous batch size per device = 1
+07/29/2023 03:16:46 - INFO - __main__ -   Total train batch size (w. parallel, distributed &amp; accumulation) = 1
+07/29/2023 03:16:46 - INFO - __main__ -   Gradient Accumulation steps = 1
+07/29/2023 03:16:46 - INFO - __main__ -   Total optimization steps = 10
+Steps:  50% 5/10 [00:06&lt;00:04,  1.07it/s, loss=0.00415, lr=0.0001]07/29/2023 03:16:52 - INFO - accelerate.accelerator - Saving current state to /sddata/output-dir/checkpoint-5
+Model weights saved in /sddata/output-dir/checkpoint-5/pytorch_lora_weights.bin
+07/29/2023 03:16:52 - INFO - accelerate.checkpointing - Optimizer state saved in /sddata/output-dir/checkpoint-5/optimizer.bin
+07/29/2023 03:16:52 - INFO - accelerate.checkpointing - Scheduler state saved in /sddata/output-dir/checkpoint-5/scheduler.bin
+07/29/2023 03:16:52 - INFO - accelerate.checkpointing - Gradient scaler state saved in /sddata/output-dir/checkpoint-5/scaler.pt
+07/29/2023 03:16:52 - INFO - accelerate.checkpointing - Random states saved in /sddata/output-dir/checkpoint-5/random_states_0.pkl
+07/29/2023 03:16:52 - INFO - __main__ - Saved state to /sddata/output-dir/checkpoint-5
+Steps: 100% 10/10 [00:10&lt;00:00,  1.34it/s, loss=0.00344, lr=0.0001]07/29/2023 03:16:56 - INFO - accelerate.accelerator - Saving current state to /sddata/output-dir/checkpoint-10
+Model weights saved in /sddata/output-dir/checkpoint-10/pytorch_lora_weights.bin
+07/29/2023 03:16:56 - INFO - accelerate.checkpointing - Optimizer state saved in /sddata/output-dir/checkpoint-10/optimizer.bin
+07/29/2023 03:16:56 - INFO - accelerate.checkpointing - Scheduler state saved in /sddata/output-dir/checkpoint-10/scheduler.bin
+07/29/2023 03:16:56 - INFO - accelerate.checkpointing - Gradient scaler state saved in /sddata/output-dir/checkpoint-10/scaler.pt
+07/29/2023 03:16:56 - INFO - accelerate.checkpointing - Random states saved in /sddata/output-dir/checkpoint-10/random_states_0.pkl
+07/29/2023 03:16:56 - INFO - __main__ - Saved state to /sddata/output-dir/checkpoint-10
+Steps: 100% 10/10 [00:10&lt;00:00,  1.34it/s, loss=0.0684, lr=0.0001] Model weights saved in /sddata/output-dir/pytorch_lora_weights.bin
+{&#39;requires_safety_checker&#39;} was not found in config. Values will be initialized to default values.
+
+Loading pipeline components...:   0% 0/7 [00:00&lt;?, ?it/s]{&#39;addition_embed_type_num_heads&#39;, &#39;num_attention_heads&#39;, &#39;time_embedding_type&#39;, &#39;class_embeddings_concat&#39;, &#39;addition_time_embed_dim&#39;, &#39;use_linear_projection&#39;, &#39;resnet_time_scale_shift&#39;, &#39;cross_attention_norm&#39;, &#39;num_class_embeds&#39;, &#39;mid_block_only_cross_attention&#39;, &#39;addition_embed_type&#39;, &#39;dual_cross_attention&#39;, &#39;mid_block_type&#39;, &#39;time_embedding_dim&#39;, &#39;encoder_hid_dim&#39;, &#39;class_embed_type&#39;, &#39;encoder_hid_dim_type&#39;, &#39;upcast_attention&#39;, &#39;time_cond_proj_dim&#39;, &#39;resnet_skip_time_act&#39;, &#39;resnet_out_scale_factor&#39;, &#39;only_cross_attention&#39;, &#39;projection_class_embeddings_input_dim&#39;, &#39;conv_in_kernel&#39;, &#39;transformer_layers_per_block&#39;, &#39;timestep_post_act&#39;, &#39;conv_out_kernel&#39;, &#39;time_embedding_act_fn&#39;} was not found in config. Values will be initialized to default values.
+Loaded unet as UNet2DConditionModel from `unet` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  14% 1/7 [00:17&lt;01:47, 17.87s/it]Loaded tokenizer as CLIPTokenizer from `tokenizer` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  29% 2/7 [00:17&lt;00:37,  7.43s/it]Loaded text_encoder as CLIPTextModel from `text_encoder` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  43% 3/7 [00:21&lt;00:22,  5.67s/it]{&#39;timestep_spacing&#39;, &#39;prediction_type&#39;} was not found in config. Values will be initialized to default values.
+Loaded scheduler as PNDMScheduler from `scheduler` subfolder of runwayml/stable-diffusion-v1-5.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+Loaded safety_checker as StableDiffusionSafetyChecker from `safety_checker` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...:  71% 5/7 [00:29&lt;00:09,  4.64s/it]Loaded feature_extractor as CLIPImageProcessor from `feature_extractor` subfolder of runwayml/stable-diffusion-v1-5.
+{&#39;force_upcast&#39;, &#39;scaling_factor&#39;} was not found in config. Values will be initialized to default values.
+Loaded vae as AutoencoderKL from `vae` subfolder of runwayml/stable-diffusion-v1-5.
+
+Loading pipeline components...: 100% 7/7 [00:31&lt;00:00,  4.48s/it]
+{&#39;solver_type&#39;, &#39;lambda_min_clipped&#39;, &#39;timestep_spacing&#39;, &#39;variance_type&#39;, &#39;prediction_type&#39;, &#39;use_karras_sigmas&#39;, &#39;thresholding&#39;, &#39;algorithm_type&#39;, &#39;sample_max_value&#39;, &#39;dynamic_thresholding_ratio&#39;, &#39;lower_order_final&#39;, &#39;solver_order&#39;} was not found in config. Values will be initialized to default values.
+Loading unet.
+Steps: 100% 10/10 [00:43&lt;00:00,  4.33s/it, loss=0.0684, lr=0.0001]
+</pre></div>
+</div>
+</div>
+</div>
+<p>CLIP の text encoder を LoRA でファインチューニングすることも可能です。殆どの場合、計算量を少し増やすだけで、よりよい結果をもたらします。LoRA で text encoder をファインチューニングするには、<code class="docutils literal notranslate"><span class="pre">train_dream_lora.py</span></code> を実行する際に、<code class="docutils literal notranslate"><span class="pre">--train_text_encoder</span></code> を指定してください。</p>
+</section>
+<section id="id6">
+<h3>LoRA チューニング結果を元にした推論<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h3>
+<p>Text-to-Image における LoRA チューニングでも説明しましたが、DreamBooth との組み合わせでも同様に<code class="docutils literal notranslate"><span class="pre">StableDiffusionPipeline</span></code> でベースモデルを読み込み、推論パイプラインを構成します。</p>
+<p>ベースモデルの重みの上に、ファインチューニングした DreamBooth モデルの LoRA モジュールを読み込み、パイプラインを GPU に移動させて推論を高速化します。<code class="docutils literal notranslate"><span class="pre">scale</span></code> 値でベースモデルと LoRA モジュールの利用度合いを調整できたことを思い出してください。</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">model_base</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;MODEL_NAME&quot;</span><span class="p">]</span>
+<span class="n">lora_model_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;OUTPUT_DIR&quot;</span><span class="p">]</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_base</span><span class="p">,</span> <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">unet</span><span class="o">.</span><span class="n">load_attn_procs</span><span class="p">(</span><span class="n">lora_model_path</span><span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+<span class="n">image</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span>
+    <span class="s2">&quot;A picture of a sks dog in a bucket.&quot;</span><span class="p">,</span>
+    <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">7.5</span><span class="p">,</span>
+    <span class="n">cross_attention_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>時間の関係上、上記 DreamBooth と LoRA チューニングの組み合わせでは十分な学習ができていないためここでは画像生成結果をお見しておりません。</p>
+<p>ただ、以下のようにしてコードを実行することで DreamBooth と LoRA チューニングによって獲得されたコーギーを合成したような画像が生成可能です。</p>
+<p>以下は上記で LoRA チューニングに使用した <a class="reference external" href="https://huggingface.co/datasets/diffusers/dog-example" rel="noreferrer" target="_blank">diffusers/dog-example</a> を十分に LoRA DreamBooth で学習させた <a class="reference external" href="https://huggingface.co/patrickvonplaten/lora_dreambooth_dog_example" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">patrickvonplaten/lora_dreambooth_dog_example</span></code></a> による画像生成例です。</p>
+<p>LoRA モジュールの読み込みには、上記で使用した <code class="docutils literal notranslate"><span class="pre">load_attn_procs()</span></code> よりも、<code class="docutils literal notranslate"><span class="pre">load_lora_weights()</span></code> の使用が好ましいようです（<a class="reference external" href="https://huggingface.co/docs/diffusers/v0.18.2/en/training/lora#text-to-image-inference" rel="noreferrer" target="_blank">公式ドキュメントより</a>）。これは <code class="docutils literal notranslate"><span class="pre">load_lora_weights()</span></code> が以下の状況に対応できるからです:</p>
+<ul class="simple">
+<li><p>U-Net や text encoder で別々の識別子を持たない LoRA モジュール（今回使用した <a class="reference external" href="https://huggingface.co/patrickvonplaten/lora_dreambooth_dog_example" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">patrickvonplaten/lora_dreambooth_dog_example</span></code></a> 含めて）の場合</p></li>
+<li><p>U-Net や text encoder で別々の識別子を持つ LoRA モジュール（<a class="reference external" href="https://huggingface.co/sayakpaul/dreambooth" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">sayakpaul/dreambooth</span></code></a> など）</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">lora_model_id</span> <span class="o">=</span> <span class="s2">&quot;patrickvonplaten/lora_dreambooth_dog_example&quot;</span>
+<span class="n">card</span> <span class="o">=</span> <span class="n">RepoCard</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">lora_model_id</span><span class="p">)</span>
+<span class="n">base_model_id</span> <span class="o">=</span> <span class="n">card</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;base_model&quot;</span><span class="p">]</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">base_model_id</span><span class="p">,</span> <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">)</span>
+<span class="n">pipe</span><span class="o">.</span><span class="n">load_lora_weights</span><span class="p">(</span><span class="n">lora_model_id</span><span class="p">)</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+<span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="n">pipe</span><span class="p">(</span>
+    <span class="s2">&quot;A picture of a sks dog in a bucket.&quot;</span><span class="p">,</span>
+    <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+    <span class="n">guidance_scale</span><span class="o">=</span><span class="mf">7.5</span><span class="p">,</span>
+    <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+    <span class="n">cross_attention_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;scale&quot;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">},</span>
+<span class="p">)</span><span class="o">.</span><span class="n">images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "a55a63936c1c48f88b5a13bcdced89dc"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "6f1b1bf566da4a91a61689c880bd30bf"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "2a3a31b6c061496db039753371a9fe5c"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>/usr/local/lib/python3.10/dist-packages/diffusers/loaders.py:1223: UserWarning: You have saved the LoRA weights using the old format. To convert the old LoRA weights to the new format, you can first load them in a dictionary and then create a new dictionary like the following: `new_state_dict = {f&#39;unet&#39;.{module_name}: params for module_name, params in old_state_dict.items()}`.
+  warnings.warn(warn_message)
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "a9edc18534e5454cb2b99e5669f20903"}</script><img alt="../_images/3a0239a9234bb0f37e084f51acdfb98a66bc350df6411f8be2e482f56e80b5e2.png" src="../_images/3a0239a9234bb0f37e084f51acdfb98a66bc350df6411f8be2e482f56e80b5e2.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./lectures"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="section-07-27.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">前へ</p>
+        <p class="prev-next-title">画像生成 AI 入門: Python による拡散モデルの理論と実践</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="section-07-29.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">次へ</p>
+        <p class="prev-next-title">画像生成 AI 入門: Python による拡散モデルの理論と実践</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目次
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-07-play-with-diffusion-model">Section 07. Play with Diffusion Model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-28-lora">Lecture 28. LoRA</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#huggingface-diffusers-clone">huggingface/diffusers からレポジトリを clone してインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#text-to-image-lora">Text-to-Image における LoRA チューニング</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">依存ライブラリのインストール</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lora">LoRA チューニングの実施</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">LoRA チューニング結果を元にした推論</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dreambooth-lora">DreamBooth における LoRA チューニング</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">依存ライブラリのインストール</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">LoRA チューニングの実施</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">LoRA チューニング結果を元にした推論</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+著者 リサーチサイエンティスト 北田俊輔
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

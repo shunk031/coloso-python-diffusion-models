@@ -1,2 +1,2 @@
-lectures/section-07-26.ipynb:170006: [redirected with Found] https://hf.co/stabilityai/stable-diffusion-2-1-unclip-small to https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip-small
 lectures/section-07-26.ipynb:190002: [redirected with Found] https://hf.co/stabilityai/stable-diffusion-2-1-unclip to https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip
+lectures/section-07-26.ipynb:170006: [redirected with Found] https://hf.co/stabilityai/stable-diffusion-2-1-unclip-small to https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip-small

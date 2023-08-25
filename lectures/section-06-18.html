@@ -1,0 +1,1034 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="ja" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="画像生成 AI 入門: Python による拡散モデルの理論と実践" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://shunk031.me/coloso-python-diffusion-models/lectures/section-06-18.html" />
+<meta property="og:site_name" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta property="og:description" content="Open In Colab Section 06. Latent Diffusion and Stable Diffusion: Latent Diffusion Model (LDM) は Stable Diffusion の元となる拡散モデルで、これまでの拡散モデルと比べて計算量が少なく広く一般的に使用されるようになりました。 本セクションでは LDM や Stable Diffusio..." />
+<meta property="og:image" content="https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/logo.png" />
+<meta property="og:image:alt" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta name="description" content="Open In Colab Section 06. Latent Diffusion and Stable Diffusion: Latent Diffusion Model (LDM) は Stable Diffusion の元となる拡散モデルで、これまでの拡散モデルと比べて計算量が少なく広く一般的に使用されるようになりました。 本セクションでは LDM や Stable Diffusio..." />
+
+    <title>画像生成 AI 入門: Python による拡散モデルの理論と実践 &#8212; 画像生成AI入門: Pythonによる拡散モデルの理論と実践</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-8ZY8TGCYMR"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-8ZY8TGCYMR');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'lectures/section-06-18';</script>
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="画像生成 AI 入門: Python による拡散モデルの理論と実践" href="section-07-19.html" />
+    <link rel="prev" title="画像生成 AI 入門: Python による拡散モデルの理論と実践" href="section-04-12.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ja"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../README.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../README.html">
+                    画像生成 AI 入門：Python による拡散モデルの理論と実践
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-01-03.html">Play with Stable Diffusion!</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-02-05.html">About Deep Learning (2)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-03-08.html">Score-based Generative Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-09.html">Denoising Diffusion Probabilistic Model (1)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-10.html">Denoising Diffusion Probabilistic Model (2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-11.html">Beyond Conventional GANs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 4</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-04-12.html">About CLIP</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 6</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">Components of Stable Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 7</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-07-19.html">Stable Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-20.html">Textual Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-21.html">DreamBooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-22.html">Attend-and-Excite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-23.html">ControlNet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-24.html">Prompt-to-Prompt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-25.html">InstructPix2Pix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-26.html">unCLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-27.html">Paint-by-example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-28.html">LoRA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-29.html">Safe Latent Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">受講者特典</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../materials/figures/README.html">高解像度図表</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-06-18.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onColab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="ソースリポジトリ"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models/issues/new?title=Issue%20on%20page%20%2Flectures/section-06-18.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="問題を報告"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="このページをダウンロード">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/lectures/section-06-18.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="ソースファイルをダウンロード"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="PDFに印刷"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="全画面モード"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="検索" aria-label="検索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>画像生成 AI 入門: Python による拡散モデルの理論と実践</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目次 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-06-latent-diffusion-and-stable-diffusion">Section 06. Latent Diffusion and Stable Diffusion</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-18-components-of-stable-diffusion">Lecture 18. Components of Stable Diffusion</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">利用する Python ライブラリをインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stable-diffusion">Stable Diffusion のコンポーネントについて</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vae-kingma-iclr-14">VAE <code class="docutils literal notranslate"><span class="pre">[Kingma+</span> <span class="pre">ICLR'14]</span></code> について</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#u-net-ronneberger-miccai-15">U-Net <code class="docutils literal notranslate"><span class="pre">[Ronneberger+</span> <span class="pre">MICCAI'15]</span></code> について</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#text-encoder-clip-text-encoder-radford-icml-21">Text Encoder (CLIP Text Encoder <code class="docutils literal notranslate"><span class="pre">[Radford+</span> <span class="pre">ICML'21]</span></code>) について</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ldm">なぜ LDM は高速で効率的なのか？</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Stable Diffusion の推論</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#diffusers-stable-diffusion">Diffusers を元に Stable Diffusion のコンポーネントの関わり合いを確認する</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="ai-python">
+<h1>画像生成 AI 入門: Python による拡散モデルの理論と実践<a class="headerlink" href="#ai-python" title="Permalink to this heading">#</a></h1>
+<p><a class="reference external" href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-06-18.ipynb" rel="noreferrer" target="_blank"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<section id="section-06-latent-diffusion-and-stable-diffusion">
+<h2>Section 06. Latent Diffusion and Stable Diffusion<a class="headerlink" href="#section-06-latent-diffusion-and-stable-diffusion" title="Permalink to this heading">#</a></h2>
+<p>Latent Diffusion Model (LDM) は Stable Diffusion の元となる拡散モデルで、これまでの拡散モデルと比べて計算量が少なく広く一般的に使用されるようになりました。</p>
+<p>本セクションでは LDM や Stable Diffusion の概要、またこれらのモデルに含まれる重要なコンポーネントについて実際に diffusers を使って動作を確認していきます。</p>
+<section id="lecture-18-components-of-stable-diffusion">
+<h3>Lecture 18. Components of Stable Diffusion<a class="headerlink" href="#lecture-18-components-of-stable-diffusion" title="Permalink to this heading">#</a></h3>
+<p>テキストから高画質な画像を生成可能な Stable Diffusion は最先端の技術を含む複数のコンポーネントから構成されています。以下、diffusers をベースにそれぞれのコンポーネントの動作原理について説明していきます。</p>
+</section>
+</section>
+<section id="id1">
+<h2>セットアップ<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<section id="gpu">
+<h3>GPU が使用できるか確認<a class="headerlink" href="#gpu" title="Permalink to this heading">#</a></h3>
+<p>本 Colab ノートブックを実行するために GPU ランタイムを使用していることを確認します。CPU ランタイムと比べて画像生成がより早くなります。以下の <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> コマンドが失敗する場合は再度講義資料の <code class="docutils literal notranslate"><span class="pre">GPU</span> <span class="pre">使用設定</span></code> のスライド説明や Google Colab の <a class="reference external" href="https://research.google.com/colaboratory/faq.html#gpu-utilization" rel="noreferrer" target="_blank">FAQ</a> 等を参考にランタイムタイプが正しく変更されているか確認してください。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>!nvidia-smi
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sun Jun 25 02:15:50 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.85.12    Driver Version: 525.85.12    CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla T4            Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   34C    P8     9W /  70W |      0MiB / 15360MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="python">
+<h3>利用する Python ライブラリをインストール<a class="headerlink" href="#python" title="Permalink to this heading">#</a></h3>
+<p>diffusers ライブラリをインストールすることで拡散モデルを簡単に使用できるようにします。diffusers ライブラリを動かす上で必要となるライブラリも追加でインストールします:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/huggingface/transformers" rel="noreferrer" target="_blank">transformers</a>: 拡散モデルにおいて核となる Transformer モデルが定義されているライブラリ</p></li>
+<li><p><a class="reference external" href="https://github.com/huggingface/accelerate" rel="noreferrer" target="_blank">accelerate</a>: transformers と連携してより高速な画像生成をサポートするライブラリ</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>!pip install diffusers==0.16.1
+!pip install transformers accelerate
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: diffusers==0.16.1 in /usr/local/lib/python3.10/dist-packages (0.16.1)
+Requirement already satisfied: Pillow in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (8.4.0)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (3.12.2)
+Requirement already satisfied: huggingface-hub&gt;=0.13.2 in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (0.15.1)
+Requirement already satisfied: importlib-metadata in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (6.7.0)
+Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (1.22.4)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (2022.10.31)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (2.27.1)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (2023.6.0)
+Requirement already satisfied: tqdm&gt;=4.42.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (4.65.0)
+Requirement already satisfied: pyyaml&gt;=5.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (6.0)
+Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (4.6.3)
+Requirement already satisfied: packaging&gt;=20.9 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (23.1)
+Requirement already satisfied: zipp&gt;=0.5 in /usr/local/lib/python3.10/dist-packages (from importlib-metadata-&gt;diffusers==0.16.1) (3.15.0)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (2023.5.7)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (3.4)
+Looking in indexes: https://pypi.org/simple, https://us-python.pkg.dev/colab-wheels/public/simple/
+Requirement already satisfied: transformers in /usr/local/lib/python3.10/dist-packages (4.30.2)
+Requirement already satisfied: accelerate in /usr/local/lib/python3.10/dist-packages (0.20.3)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from transformers) (3.12.2)
+Requirement already satisfied: huggingface-hub&lt;1.0,&gt;=0.14.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (0.15.1)
+Requirement already satisfied: numpy&gt;=1.17 in /usr/local/lib/python3.10/dist-packages (from transformers) (1.22.4)
+Requirement already satisfied: packaging&gt;=20.0 in /usr/local/lib/python3.10/dist-packages (from transformers) (23.1)
+Requirement already satisfied: pyyaml&gt;=5.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (6.0)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from transformers) (2022.10.31)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from transformers) (2.27.1)
+Requirement already satisfied: tokenizers!=0.11.3,&lt;0.14,&gt;=0.11.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (0.13.3)
+Requirement already satisfied: safetensors&gt;=0.3.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (0.3.1)
+Requirement already satisfied: tqdm&gt;=4.27 in /usr/local/lib/python3.10/dist-packages (from transformers) (4.65.0)
+Requirement already satisfied: psutil in /usr/local/lib/python3.10/dist-packages (from accelerate) (5.9.5)
+Requirement already satisfied: torch&gt;=1.6.0 in /usr/local/lib/python3.10/dist-packages (from accelerate) (2.0.1+cu118)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&lt;1.0,&gt;=0.14.1-&gt;transformers) (2023.6.0)
+Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&lt;1.0,&gt;=0.14.1-&gt;transformers) (4.6.3)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.6.0-&gt;accelerate) (1.11.1)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.6.0-&gt;accelerate) (3.1)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.6.0-&gt;accelerate) (3.1.2)
+Requirement already satisfied: triton==2.0.0 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.6.0-&gt;accelerate) (2.0.0)
+Requirement already satisfied: cmake in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.6.0-&gt;accelerate) (3.25.2)
+Requirement already satisfied: lit in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.6.0-&gt;accelerate) (16.0.6)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (2023.5.7)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (3.4)
+Requirement already satisfied: MarkupSafe&gt;=2.0 in /usr/local/lib/python3.10/dist-packages (from jinja2-&gt;torch&gt;=1.6.0-&gt;accelerate) (2.1.3)
+Requirement already satisfied: mpmath&gt;=0.19 in /usr/local/lib/python3.10/dist-packages (from sympy-&gt;torch&gt;=1.6.0-&gt;accelerate) (1.3.0)
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="stable-diffusion">
+<h2>Stable Diffusion のコンポーネントについて<a class="headerlink" href="#stable-diffusion" title="Permalink to this heading">#</a></h2>
+<p>Stable Diffusion は、<a class="reference external" href="https://arxiv.org/abs/2112.10752" rel="noreferrer" target="_blank">High-Resolution Image Synthesis with Latent Diffusion Models</a> で提案された Latent Diffusion Model (LDM) という特殊なタイプの拡散モデルに基づいています。</p>
+<p>LDM は、実際のピクセル空間を使用する代わりに、低次元の潜在空間上で拡散過程を計算することにより、メモリと計算の複雑さを軽減することができます。これが標準的な拡散モデルと LDM の主な違いです。LDM では、モデルは画像の潜在（圧縮）表現を生成するように訓練されます。</p>
+<p>LDM は以下の3つの主要なコンポーネントから構成されています:</p>
+<ul class="simple">
+<li><p>Variational Auto-Encoder (VAE)</p></li>
+<li><p>U-Net</p></li>
+<li><p>Text encoder (CLIP text encoder)</p></li>
+</ul>
+<section id="vae-kingma-iclr-14">
+<h3>VAE <a class="reference external" href="https://arxiv.org/abs/1312.6114" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">[Kingma+</span> <span class="pre">ICLR'14]</span></code></a> について<a class="headerlink" href="#vae-kingma-iclr-14" title="Permalink to this heading">#</a></h3>
+<p>VAE には、エンコーダー (encoder) とデコーダー (decoder) から構成されています。エンコーダーは、画像を低次元の潜在表現に変換し、U-Net の入力として使用します。デコーダは、逆に潜在表現を画像に変換します。</p>
+<p>LDM の学習では、エンコーダは、各ステップで少しずつノイズを付与していく拡散過程 (forward diffusion process) のために、画像の潜在表現 (latent data) を得るために使用されます。推論では、逆拡散過程 (reverse diffusion process) で生成された潜在データを、デコーダで画像に戻します。後述するように、推論時に必要なのはVAEデコーダだけです。</p>
+</section>
+<section id="u-net-ronneberger-miccai-15">
+<h3>U-Net <a class="reference external" href="https://arxiv.org/abs/1505.04597" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">[Ronneberger+</span> <span class="pre">MICCAI'15]</span></code></a> について<a class="headerlink" href="#u-net-ronneberger-miccai-15" title="Permalink to this heading">#</a></h3>
+<p>U-Netは、ResNet ブロックで構成されたエンコーダ部とデコーダ部から構成されています。エンコーダは画像表現を低解像度画像表現に圧縮 (encode) し、デコーダは低解像度画像表現をノイズの少ない元の高解像度画像表現に復号 (decode) します。より具体的に U-Net はノイズ画像からノイズ部分を予測します。これは最終的にノイズ画像から画像を生成する際に利用されます。</p>
+<p>U-Netがダウンサンプリング中に重要な情報を失うのを防ぐため、通常、エンコーダのダウンサンプリング ResNet とデコーダのアップサンプリング ResNet の間にショートカットの接続 (skip connection, residual connection などと呼ばれる) が追加されます。さらに、Stable Diffusion の U-Net は、cross attention 層を介して、CLIP text encoder によるテキストベクトルの基づく条件付けが可能です。Cross attention 層は、U-Net のエンコーダ部とデコーダ部の両方に、通常 ResNet ブロックの間に追加されます。</p>
+</section>
+<section id="text-encoder-clip-text-encoder-radford-icml-21">
+<h3>Text Encoder (CLIP Text Encoder <a class="reference external" href="https://arxiv.org/abs/2103.00020" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">[Radford+</span> <span class="pre">ICML'21]</span></code></a>) について<a class="headerlink" href="#text-encoder-clip-text-encoder-radford-icml-21" title="Permalink to this heading">#</a></h3>
+<p>テキストエンコーダは、例えば <code class="docutils literal notranslate"><span class="pre">&quot;An</span> <span class="pre">astronout</span> <span class="pre">riding</span> <span class="pre">a</span> <span class="pre">horse&quot;</span></code> のような入力プロンプトを、U-Net が理解できるベクトルに変換する役割を担っています。これは通常、入力トークン列を潜在的なテキストベクトルの列にマッピングするのみに利用されます。</p>
+<p>Stable Diffusion は Imagen <a class="reference external" href="https://arxiv.org/abs/2205.11487" rel="noreferrer" target="_blank">[Saharia+ NeurIPS'22]</a> を参考にしており、学習中に CLIP text encoder を学習せず、単に事前学習済みモデルとして使用します。</p>
+</section>
+<section id="ldm">
+<h3>なぜ LDM は高速で効率的なのか？<a class="headerlink" href="#ldm" title="Permalink to this heading">#</a></h3>
+<p>LDM の U-Net は低次元空間で動作するため、ピクセル空間の拡散モデルと比較してメモリや計算量を大幅に削減することができます。例えば、Stable Diffusionで使用される Auto-Encoder は、縮小率が8であり、これは、形状が <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">512,</span> <span class="pre">512)</span></code> の画像が潜在空間では <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">64,</span> <span class="pre">64)</span></code> となります。これは LDM のように入力として潜在データではなく画像として扱ってしまうと<code class="docutils literal notranslate"><span class="pre">8</span> <span class="pre">✕</span> <span class="pre">8</span> <span class="pre">=</span> <span class="pre">64</span></code> 倍のメモリを必要とすることを意味しています。</p>
+<p>これが、16 GB GPU RAM を有する Colab でも、<code class="docutils literal notranslate"><span class="pre">512</span> <span class="pre">✕</span> <span class="pre">512</span></code> の画像を高速に生成できる理由です 🤗</p>
+</section>
+<section id="id2">
+<h3>Stable Diffusion の推論<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<p>それでは、推論時のモデルの動きを、論理的な流れで詳しく見ていきましょう。</p>
+<p>Stable Diffusion は、潜在的な seed と text prompt の両方を入力として受け取ります。潜在的な seed を元に、ランダムなノイズを元にした <code class="docutils literal notranslate"><span class="pre">64</span> <span class="pre">✕</span> <span class="pre">64</span></code> サイズのノイズ画像を生成します。
+一方、text prompt は CLIP の text encoder によって、<code class="docutils literal notranslate"><span class="pre">77</span> <span class="pre">✕</span> <span class="pre">768</span></code> サイズのテキストベクトルに変換されます。</p>
+<p>次に、U-Net は、テキストベクトルを条件として、ノイズ画像から繰り返しノイズ除去します。U-Net の出力は生成が期待される綺麗な画像と現在のノイズ画像との差分です。この出力はスケジューラアルゴリズムによってノイズ除去された潜在表現を計算するために使用されます。この計算には多くの異なるスケジューラアルゴリズムを使用することができ、それぞれに長所と短所があります。Stable Diffusionでは、以下のいずれかを使用することが推奨されています:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_pndm.py" rel="noreferrer" target="_blank">PNDM スケジューラー</a></p>
+<ul>
+<li><p>デフォルトで使用されています</p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_lms_discrete.py" rel="noreferrer" target="_blank">K-LMS スケジューラー</a></p></li>
+<li><p><a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_heun_discrete.py" rel="noreferrer" target="_blank">Heun Discrete スケジューラー</a></p></li>
+<li><p><a class="reference external" href="https://github.com/huggingface/diffusers/blob/main/src/diffusers/schedulers/scheduling_dpmsolver_multistep.py" rel="noreferrer" target="_blank">DPM Solver Multistep スケジューラー</a></p>
+<ul>
+<li><p>このスケジューラーは、より少ないステップで優れた品質を実現することができます。デフォルトの50ではなく、25で試すことができます 🤗</p></li>
+</ul>
+</li>
+</ul>
+<p>スケジューラアルゴリズムの機能に関する理論は、このノートブックの範囲外ですが、要するに、以前のノイズ表現と予測ノイズの残差から、予測ノイズ除去画像表現を計算することを覚えておくとよいでしょう。詳しくは、「<a class="reference external" href="https://arxiv.org/abs/2206.00364" rel="noreferrer" target="_blank">拡散に基づく生成モデルの設計空間の解明 - Elucidating the Design Space of Diffusion-Based Generative Models</a>」を参照してください。</p>
+<p>このノイズ除去処理を約 50 回繰り返すことで、より良い潜在表現を段階的に取得することができます。潜在表現が完成すると、VAE のデコーダ部によって復号され、生成画像を得ることができます。</p>
+</section>
+</section>
+<section id="diffusers-stable-diffusion">
+<h2>Diffusers を元に Stable Diffusion のコンポーネントの関わり合いを確認する<a class="headerlink" href="#diffusers-stable-diffusion" title="Permalink to this heading">#</a></h2>
+<p>このセクションでは <a class="reference external" href="https://arxiv.org/abs/2206.00364" rel="noreferrer" target="_blank">Karras+ NeurIPS'22</a> の <a class="reference external" href="https://huggingface.co/docs/diffusers/api/schedulers/lms_discrete" rel="noreferrer" target="_blank">K-LMS スケジューラー</a> と呼ばれる一般的に使用されるものとは少し異なるスケジューラを利用して Stable Diffusion を使う方法を紹介します。</p>
+<p>まず、関係する個々のモデルやコンポーネントを読み込むことから始めます。GPU を使用するように指定し、読み込むモデルとして <code class="docutils literal notranslate"><span class="pre">runwayml/stable-diffusion-v1-5</span></code> を指定しました。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="n">torch_device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+
+<span class="n">sd_model_id</span> <span class="o">=</span> <span class="s2">&quot;runwayml/stable-diffusion-v1-5&quot;</span>
+<span class="n">clip_model_id</span> <span class="o">=</span> <span class="s2">&quot;openai/clip-vit-large-patch14&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>学習済み Stable Diffusion には、以下のフォルダ名・ディレクトリ名でそれぞれ学習済みコンポーネントが格納されています:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">text_encoder</span></code>: Stable Diffusion は CLIP を使用していますが、他の拡散モデルではBERT など他のエンコーダを使用することがあります</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tokenizer</span></code>: <code class="docutils literal notranslate"><span class="pre">text_encoder</span></code> モデルで使用されているものと一致する必要があります</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">scheduler</span></code>: 学習中に画像にノイズを徐々に追加するために使用されるスケジューリングアルゴリズムです</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">unet</span></code>: 入力の潜在的な表現を生成するために使用されるモデルです</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">vae</span></code>: 潜在表現を実画像にデコードするために使用する auto-encoder モデルです</p></li>
+</ul>
+<p>各コンポーネントに定義されている <code class="docutils literal notranslate"><span class="pre">from_pretrained</span></code> 関数の <code class="docutils literal notranslate"><span class="pre">subfolder</span></code> 引数を用いて、保存されたフォルダを参照することで、対象のコンポーネントを読み込むことができます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">CLIPTextModel</span><span class="p">,</span> <span class="n">CLIPTokenizer</span>
+<span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">AutoencoderKL</span><span class="p">,</span> <span class="n">UNet2DConditionModel</span><span class="p">,</span> <span class="n">PNDMScheduler</span>
+
+<span class="c1"># VAE と U-Net は Stable Diffusion の事前学習済みモデルから読み込む</span>
+<span class="n">vae</span> <span class="o">=</span> <span class="n">AutoencoderKL</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">sd_model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;vae&quot;</span><span class="p">)</span>
+<span class="n">unet</span> <span class="o">=</span> <span class="n">UNet2DConditionModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">sd_model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;unet&quot;</span><span class="p">)</span>
+
+<span class="c1"># CLIP は openai/clip-vit-large-patch14 から読み込む</span>
+<span class="c1"># Stable Diffusion 学習時には CLIP は freeze されているため</span>
+<span class="c1"># もともとの重みを読み込むことでも動作が可能</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">CLIPTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">clip_model_id</span><span class="p">)</span>
+<span class="n">text_encoder</span> <span class="o">=</span> <span class="n">CLIPTextModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">clip_model_id</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f5fca0de9a284a71ad26f196d8c44a6f"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "bd0dd463d9e8420eb1fc5bc8a03a2cfe"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "3a8bed3d328e4c45b7cd9db6c7319196"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "a07c2a3d8f274d46b858b29a588053fe"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "a9fb19128e6b481c9d101a8db1193dfa"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "38f6d933b63d4f3fbe304c8ff2dbbdbc"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "c5428cb17a184b6a9fba28b64124cc98"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "38474b25b1e041f29744775c829db699"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "0692ae1ea1794329aad96e17c03c08ca"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "2a11bcbde6034f998e4f4dabb0577579"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Some weights of the model checkpoint at openai/clip-vit-large-patch14 were not used when initializing CLIPTextModel: [&#39;vision_model.encoder.layers.21.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.3.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.11.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.1.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.19.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.17.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.12.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.8.mlp.fc2.weight&#39;, &#39;vision_model.embeddings.position_ids&#39;, &#39;vision_model.encoder.layers.12.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.15.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.15.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.23.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.13.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.5.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.0.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.2.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.8.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.11.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.12.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.16.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.19.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.0.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.22.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.1.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.9.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.10.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.22.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.9.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.15.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.9.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.1.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.6.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.9.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.4.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.11.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.0.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.9.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.15.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.7.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.12.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.20.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.12.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.17.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.19.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.23.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.16.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.10.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.5.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.21.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.15.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.23.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.23.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.5.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.2.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.6.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.7.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.20.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.7.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.5.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.12.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.2.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.7.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.18.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.0.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.11.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.9.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.16.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.9.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.16.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.13.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.6.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.16.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.6.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.10.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.14.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.0.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.0.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.15.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.12.self_attn.k_proj.weight&#39;, &#39;visual_projection.weight&#39;, &#39;vision_model.encoder.layers.13.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.5.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.4.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.12.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.4.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.12.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.15.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.2.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.8.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.14.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.1.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.3.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.3.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.14.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.1.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.21.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.14.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.22.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.10.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.2.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.3.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.6.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.1.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.15.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.23.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.17.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.20.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.0.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.4.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.7.self_attn.out_proj.weight&#39;, &#39;vision_model.post_layernorm.weight&#39;, &#39;vision_model.encoder.layers.19.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.21.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.13.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.14.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.16.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.9.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.10.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.5.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.12.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.18.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.1.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.10.layer_norm1.bias&#39;, &#39;vision_model.pre_layrnorm.bias&#39;, &#39;vision_model.encoder.layers.7.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.5.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.2.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.22.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.1.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.22.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.0.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.21.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.22.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.20.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.7.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.14.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.22.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.4.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.7.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.13.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.7.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.9.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.20.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.22.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.23.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.9.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.20.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.10.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.17.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.21.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.13.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.17.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.3.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.13.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.21.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.10.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.6.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.16.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.10.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.2.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.23.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.19.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.8.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.8.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.21.layer_norm2.weight&#39;, &#39;vision_model.embeddings.position_embedding.weight&#39;, &#39;vision_model.encoder.layers.5.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.19.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.14.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.12.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.6.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.14.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.1.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.2.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.5.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.17.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.19.self_attn.k_proj.weight&#39;, &#39;vision_model.embeddings.patch_embedding.weight&#39;, &#39;vision_model.encoder.layers.2.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.5.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.20.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.18.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.13.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.1.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.23.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.4.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.17.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.2.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.7.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.13.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.17.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.18.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.4.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.1.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.20.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.18.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.7.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.6.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.8.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.19.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.2.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.17.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.16.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.15.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.2.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.15.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.0.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.14.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.3.self_attn.v_proj.bias&#39;, &#39;vision_model.pre_layrnorm.weight&#39;, &#39;vision_model.encoder.layers.21.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.2.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.11.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.5.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.16.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.11.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.9.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.15.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.20.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.0.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.3.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.6.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.14.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.11.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.19.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.18.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.4.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.0.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.21.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.4.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.18.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.22.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.7.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.18.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.14.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.13.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.10.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.11.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.12.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.8.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.6.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.4.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.3.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.9.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.22.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.11.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.6.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.8.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.16.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.13.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.18.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.19.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.16.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.16.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.2.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.20.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.11.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.3.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.17.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.4.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.18.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.7.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.9.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.13.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.5.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.6.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.22.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.14.self_attn.v_proj.weight&#39;, &#39;vision_model.embeddings.class_embedding&#39;, &#39;vision_model.encoder.layers.17.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.19.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.18.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.20.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.3.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.3.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.13.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.21.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.23.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.3.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.15.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.13.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.14.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.19.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.19.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.8.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.4.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.18.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.12.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.20.self_attn.k_proj.bias&#39;, &#39;vision_model.post_layernorm.bias&#39;, &#39;vision_model.encoder.layers.10.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.15.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.9.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.8.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.1.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.20.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.17.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.16.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.10.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.18.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.9.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.14.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.16.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.18.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.4.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.3.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.15.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.8.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.0.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.20.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.10.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.22.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.23.layer_norm2.bias&#39;, &#39;text_projection.weight&#39;, &#39;vision_model.encoder.layers.8.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.14.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.11.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.17.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.2.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.12.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.17.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.21.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.12.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.6.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.6.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.10.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.5.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.22.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.6.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.14.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.22.self_attn.out_proj.weight&#39;, &#39;vision_model.encoder.layers.20.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.3.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.17.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.22.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.7.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.21.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.11.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.5.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.8.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.11.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.13.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.8.layer_norm1.weight&#39;, &#39;logit_scale&#39;, &#39;vision_model.encoder.layers.4.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.5.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.23.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.18.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.0.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.10.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.19.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.18.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.1.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.23.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.23.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.1.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.12.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.2.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.7.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.8.self_attn.k_proj.bias&#39;, &#39;vision_model.encoder.layers.3.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.11.mlp.fc2.bias&#39;, &#39;vision_model.encoder.layers.10.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.21.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.22.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.21.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.23.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.8.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.0.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.5.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.19.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.16.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.15.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.0.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.7.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.1.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.4.layer_norm1.weight&#39;, &#39;vision_model.encoder.layers.0.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.21.mlp.fc2.weight&#39;, &#39;vision_model.encoder.layers.3.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.13.self_attn.v_proj.bias&#39;, &#39;vision_model.encoder.layers.11.mlp.fc1.weight&#39;, &#39;vision_model.encoder.layers.17.mlp.fc1.bias&#39;, &#39;vision_model.encoder.layers.23.layer_norm2.weight&#39;, &#39;vision_model.encoder.layers.16.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.15.self_attn.q_proj.weight&#39;, &#39;vision_model.encoder.layers.11.self_attn.k_proj.weight&#39;, &#39;vision_model.encoder.layers.23.self_attn.out_proj.bias&#39;, &#39;vision_model.encoder.layers.9.layer_norm1.bias&#39;, &#39;vision_model.encoder.layers.1.layer_norm2.bias&#39;, &#39;vision_model.encoder.layers.6.self_attn.v_proj.weight&#39;, &#39;vision_model.encoder.layers.20.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.4.self_attn.q_proj.bias&#39;, &#39;vision_model.encoder.layers.19.layer_norm1.weight&#39;]
+- This IS expected if you are initializing CLIPTextModel from the checkpoint of a model trained on another task or with another architecture (e.g. initializing a BertForSequenceClassification model from a BertForPreTraining model).
+- This IS NOT expected if you are initializing CLIPTextModel from the checkpoint of a model that you expect to be exactly identical (initializing a BertForSequenceClassification model from a BertForSequenceClassification model).
+</pre></div>
+</div>
+</div>
+</div>
+<p>今度は、あらかじめ用意されたスケジューラーを読み込むのではなく、K-LMS　のスケジューラーを使うことにします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">LMSDiscreteScheduler</span>
+
+<span class="n">scheduler</span> <span class="o">=</span> <span class="n">LMSDiscreteScheduler</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">sd_model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;scheduler&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "9f306d76cab0423ebebb8b37c721a0be"}</script></div>
+</div>
+<p>次に、読み込んだコンポーネントをGPUに移動させます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">vae</span> <span class="o">=</span> <span class="n">vae</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
+<span class="n">text_encoder</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
+<span class="n">unet</span> <span class="o">=</span> <span class="n">unet</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>画像生成に使用するパラメータを定義します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;a photograph of an astronaut riding a horse&quot;</span>
+
+<span class="n">height</span> <span class="o">=</span> <span class="mi">512</span> <span class="c1"># 生成画像の高さ</span>
+<span class="n">width</span> <span class="o">=</span> <span class="mi">512</span>  <span class="c1"># 生成画像の幅</span>
+
+<span class="n">num_inference_steps</span> <span class="o">=</span> <span class="mi">50</span> <span class="c1"># ノイズ除去のステップ数; デフォルト値を使用</span>
+
+<span class="n">guidance_scale</span> <span class="o">=</span> <span class="mf">7.5</span> <span class="c1"># classifier-free guidance の guidance scale</span>
+
+<span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">32</span><span class="p">)</span>   <span class="c1"># seed を生成する generator</span>
+
+<span class="n">batch_size</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">guidance_scale</span></code> は、<a class="reference external" href="https://arxiv.org/abs/2205.11487" rel="noreferrer" target="_blank">Imagen の論文</a> の式 (2) のガイダンス重み <code class="docutils literal notranslate"><span class="pre">w</span></code> に類似して定義されていることに注意してください。<code class="docutils literal notranslate"><span class="pre">guidance_scale</span> <span class="pre">==</span> <span class="pre">1</span></code> は、分類器不使用誘導 (classifier-free guidance) を行うことに相当します。ここでは、前回と同様に 7.5 に設定しています。</p>
+<p>まず、プロンプトのテキストベクトルを <code class="docutils literal notranslate"><span class="pre">text_embeddings</span></code> (embeddings: 埋め込み; ある低次元空間への写像を &quot;埋め込む&quot; と読んだりするために、埋め込みと呼ばれることが多いです) として取得します。これらのベクトルは U-Net モデルの条件付けに使われます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">text_input</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span>
+    <span class="n">prompt</span><span class="p">,</span>
+    <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;max_length&quot;</span><span class="p">,</span>
+    <span class="n">max_length</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span><span class="p">,</span>
+    <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
+<span class="p">)</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">(</span><span class="n">text_input</span><span class="o">.</span><span class="n">input_ids</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">))</span>
+    <span class="n">text_embeddings</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">last_hidden_state</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">text_embeddings</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1, 77, 768])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Classifier-free guidance のための条件なしテキストベクトルを取得します。実際は padding token (空テキスト) に対するベクトルのみになります。これらは、条件付き <code class="docutils literal notranslate"><span class="pre">text_embeddings</span></code> (<code class="docutils literal notranslate"><span class="pre">batch_size</span> <span class="pre">x</span> <span class="pre">seq_length</span></code>) と同じサイズである必要があります。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">max_length</span> <span class="o">=</span> <span class="n">text_input</span><span class="o">.</span><span class="n">input_ids</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">uncond_input</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="p">(</span>
+    <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="n">batch_size</span><span class="p">,</span>
+    <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;max_length&quot;</span><span class="p">,</span>
+    <span class="n">max_length</span><span class="o">=</span><span class="n">max_length</span><span class="p">,</span>
+    <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span>
+<span class="p">)</span>
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">(</span><span class="n">uncond_input</span><span class="o">.</span><span class="n">input_ids</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">))</span>
+    <span class="n">uncond_embeddings</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">last_hidden_state</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">uncond_embeddings</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1, 77, 768])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Classifier-free guidance のために、2回 <code class="docutils literal notranslate"><span class="pre">text_encoder</span></code> に入力する必要があります。1 つは条件付きベクトル (<code class="docutils literal notranslate"><span class="pre">text_embeddings</span></code>)、もう 1 つは条件なしベクトル (<code class="docutils literal notranslate"><span class="pre">uncond_embeddings</span></code>) です。実際は 2 回の入力を避けるために両者を 1 つのバッチに連結して入力する方法がとられます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">text_embeddings</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">uncond_embeddings</span><span class="p">,</span> <span class="n">text_embeddings</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">text_embeddings</span><span class="o">.</span><span class="n">size</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([2, 77, 768])
+</pre></div>
+</div>
+</div>
+</div>
+<p>画像生成のために、初期の状態となるランダムノイズを生成します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">latents</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span>
+  <span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">unet</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">in_channels</span><span class="p">,</span> <span class="n">height</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span> <span class="n">width</span> <span class="o">//</span> <span class="mi">8</span><span class="p">),</span>
+  <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">latents</span> <span class="o">=</span> <span class="n">latents</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">torch_device</span><span class="p">)</span>
+
+<span class="n">latents</span><span class="o">.</span><span class="n">shape</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>torch.Size([1, 4, 64, 64])
+</pre></div>
+</div>
+</div>
+</div>
+<p>サイズが <code class="docutils literal notranslate"><span class="pre">64</span> <span class="pre">x</span> <span class="pre">64</span></code> の潜在データが生成されることが期待されます。モデルはこの潜在データ (初期は純粋なノイズ) を、逆拡散過程と VAE のデコードを経て <code class="docutils literal notranslate"><span class="pre">512</span> <span class="pre">x</span> <span class="pre">512</span></code> の画像として変換していきます。</p>
+<p>次に、選択した <code class="docutils literal notranslate"><span class="pre">num_inference_steps</span></code> でスケジューラーを初期化します。これにより、ノイズ除去処理中に使用される σ と正確なステップ数が計算されます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">scheduler</span><span class="o">.</span><span class="n">set_timesteps</span><span class="p">(</span><span class="n">num_inference_steps</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>K-LMS スケジューラは、潜在データに σ を掛ける合わせる必要があるため、以下のように計算しておきます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">latents</span> <span class="o">=</span> <span class="n">latents</span> <span class="o">*</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">init_noise_sigma</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>ノイズ除去のループを計算する準備が整いました。以下のようにして段階的にノイズを除去していきましょう。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span> <span class="nn">torch</span> <span class="kn">import</span> <span class="n">autocast</span>
+
+<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">scheduler</span><span class="o">.</span><span class="n">timesteps</span><span class="p">):</span>
+
+    <span class="c1"># Classifier-free guidance で 2 回 のモデル forward 計算を避けるために、潜在データを 2 つににしてバッチ化します</span>
+    <span class="n">latent_model_input</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">([</span><span class="n">latents</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">latent_model_input</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">scale_model_input</span><span class="p">(</span><span class="n">latent_model_input</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+    <span class="c1"># U-Net を元にノイズ残差を予測します</span>
+    <span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+        <span class="n">noise_pred</span> <span class="o">=</span> <span class="n">unet</span><span class="p">(</span><span class="n">latent_model_input</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">encoder_hidden_states</span><span class="o">=</span><span class="n">text_embeddings</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span>
+
+    <span class="c1"># Classifier-free guidance を適用します</span>
+    <span class="c1"># - 計算されたノイズ残差に対して、無条件ベクトルとテキスト条件付きベクトルに分割</span>
+    <span class="c1"># - 分割されたそれぞれを用いて classifier-free guidance を計算</span>
+    <span class="n">noise_pred_uncond</span><span class="p">,</span> <span class="n">noise_pred_text</span> <span class="o">=</span> <span class="n">noise_pred</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">noise_pred</span> <span class="o">=</span> <span class="n">noise_pred_uncond</span> <span class="o">+</span> <span class="n">guidance_scale</span> <span class="o">*</span> <span class="p">(</span><span class="n">noise_pred_text</span> <span class="o">-</span> <span class="n">noise_pred_uncond</span><span class="p">)</span>
+
+    <span class="c1"># 現在のステップ x_t から前のステップ x_{t-1} を予測</span>
+    <span class="n">latents</span> <span class="o">=</span> <span class="n">scheduler</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">noise_pred</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">latents</span><span class="p">)</span><span class="o">.</span><span class="n">prev_sample</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "acf69148f79742feaaecf9c8455c03ff"}</script></div>
+</div>
+<p>生成された潜在データを画像に戻すためのデコードに <code class="docutils literal notranslate"><span class="pre">vae</span></code> を使用します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 適切なスケーリングを行った後に、VAE でデコードを行う</span>
+<span class="n">latents</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">0.18215</span> <span class="o">*</span> <span class="n">latents</span>
+
+<span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">vae</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">latents</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>最後に、画像を簡単に表示したり保存したりできるように、PIL 形式に変換します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+
+<span class="n">image</span> <span class="o">=</span> <span class="p">(</span><span class="n">image</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mf">0.5</span><span class="p">)</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">cpu</span><span class="p">()</span><span class="o">.</span><span class="n">permute</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+<span class="n">images</span> <span class="o">=</span> <span class="p">(</span><span class="n">image</span> <span class="o">*</span> <span class="mi">255</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;uint8&quot;</span><span class="p">)</span>
+<span class="n">pil_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">image</span><span class="p">)</span> <span class="k">for</span> <span class="n">image</span> <span class="ow">in</span> <span class="n">images</span><span class="p">]</span>
+<span class="n">pil_images</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../_images/93d40d96df9999ff0cf380a10d223542c465636d970bfd55b815592d683d3caa.png" src="../_images/93d40d96df9999ff0cf380a10d223542c465636d970bfd55b815592d683d3caa.png" />
+</div>
+</div>
+<p>以上のようにして Stable Diffusion を構成する各要素を使用して自身の好きなようにカスタマイズできる手順を一通り体験していただきました。</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./lectures"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="section-04-12.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">前へ</p>
+        <p class="prev-next-title">画像生成 AI 入門: Python による拡散モデルの理論と実践</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="section-07-19.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">次へ</p>
+        <p class="prev-next-title">画像生成 AI 入門: Python による拡散モデルの理論と実践</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目次
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-06-latent-diffusion-and-stable-diffusion">Section 06. Latent Diffusion and Stable Diffusion</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-18-components-of-stable-diffusion">Lecture 18. Components of Stable Diffusion</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">利用する Python ライブラリをインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#stable-diffusion">Stable Diffusion のコンポーネントについて</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#vae-kingma-iclr-14">VAE <code class="docutils literal notranslate"><span class="pre">[Kingma+</span> <span class="pre">ICLR'14]</span></code> について</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#u-net-ronneberger-miccai-15">U-Net <code class="docutils literal notranslate"><span class="pre">[Ronneberger+</span> <span class="pre">MICCAI'15]</span></code> について</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#text-encoder-clip-text-encoder-radford-icml-21">Text Encoder (CLIP Text Encoder <code class="docutils literal notranslate"><span class="pre">[Radford+</span> <span class="pre">ICML'21]</span></code>) について</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#ldm">なぜ LDM は高速で効率的なのか？</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">Stable Diffusion の推論</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#diffusers-stable-diffusion">Diffusers を元に Stable Diffusion のコンポーネントの関わり合いを確認する</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+著者 リサーチサイエンティスト 北田俊輔
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
