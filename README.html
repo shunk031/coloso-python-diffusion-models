@@ -56,6 +56,13 @@
     <script src="_static/translations.js"></script>
     <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
     <script src="_static/design-tabs.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-8ZY8TGCYMR"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-8ZY8TGCYMR');
+            </script>
     <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
 const thebe_selector = ".thebe,.cell"
 const thebe_selector_input = "pre"
@@ -409,11 +416,14 @@ document.write(`
   <section class="tex2jax_ignore mathjax_ignore" id="ai-python">
 <h1>画像生成 AI 入門：Python による拡散モデルの理論と実践<a class="headerlink" href="#ai-python" title="Permalink to this heading">#</a></h1>
 <p>リサーチサイエンティスト <a class="reference external" href="https://shunk031.me/">北田 俊輔</a>, Ph.D.</p>
-<p><a class="reference external" href="https://github.com/shunk031/coloso-python-diffusion-models/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green" /></a>
+<p><a class="reference external" href="https://github.com/shunk031/coloso-python-diffusion-models/actions/workflows/deploy.yaml"><img alt="deploy-book" src="https://github.com/shunk031/coloso-python-diffusion-models/actions/workflows/deploy.yaml/badge.svg" /></a>
+<a class="reference external" href="https://github.com/shunk031/coloso-python-diffusion-models/blob/main/LICENSE"><img alt="License" src="https://img.shields.io/badge/License-MIT-green" /></a>
 <img alt="Python" src="https://img.shields.io/badge/%F0%9F%90%8D%20Python-3.8-orange" />
 <a class="reference external" href="https://github.com/huggingface/diffusers"><img alt="Diffusers" src="https://img.shields.io/badge/%F0%9F%A4%97%20Diffusers-0.16.0-orange" /></a></p>
 <p align="center">
-    <iframe width="560" height="315" src="https://www.youtube.com/embed/-IPEUOcPTas" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+ <a href="https://www.youtube.com/watch?v=-IPEUOcPTas">
+    <img width="560" src="https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/coloso_kitada_video.png">
+  </a>
 </p>
 <p>本レポジトリでは <a class="reference external" href="https://coloso.jp/">Coloso （コロソ）</a> で開講されている <a class="reference external" href="https://coloso.jp/programming/researchscientist-kitada-jp"><code class="docutils literal notranslate"><span class="pre">&quot;画像生成</span> <span class="pre">AI</span> <span class="pre">入門：Python</span> <span class="pre">による拡散モデルの理論と実践&quot;</span></code></a> で扱う notebook を管理しています。各 notebook は Jupyter notebook としてまとめられており、Google Colab で実行されることを想定しています。</p>
 <p><a class="reference external" href="https://coloso.jp/event/creativecoloso_jp">Coloso</a> は <strong>「業界トップクラスの専門家のノウハウをオンラインで学ぶ」</strong> ことを目標に作られた VOD （ビデオ・オン・デマンド）　型オンライン教育サービスです。</p>
