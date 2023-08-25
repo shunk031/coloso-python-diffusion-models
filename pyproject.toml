@@ -6,7 +6,7 @@ authors = ["Shunsuke KITADA <shunsuke.kitada.0831@gmail.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = "^3.9"
 jupyter-book = "^0.15.1"
 sphinxext-opengraph = "^0.8.2"
 sphinxcontrib-external-link = {git = "https://github.com/attakei-lab/sphinxcontrib-external-link.git", branch = "main"}
