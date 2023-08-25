@@ -76,6 +76,12 @@
 
 - https://github.com/shunk031/coloso-python-diffusion-models/issues
 
+## 🔗 関連リンク
+
+- 講座ページ | リサーチサイエンティスト 北田俊輔 | Coloso. | コロソ。https://coloso.jp/programming/researchscientist-kitada-jp 
+- Colaboratory へようこそ - Colaboratory https://colab.research.google.com
+- Huggingface Diffusers https://huggingface.co/docs/diffusers/index 
+
 ## License
 
 MIT
