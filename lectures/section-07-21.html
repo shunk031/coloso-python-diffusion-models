@@ -1,0 +1,1477 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="ja" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+    <title>画像生成 AI 入門: Python による拡散モデルの理論と実践 &#8212; 画像生成AI入門: Pythonによる拡散モデルの理論と実践</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" href="../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script src="../_static/clipboard.min.js"></script>
+    <script src="../_static/copybutton.js"></script>
+    <script src="../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../_static/togglebutton.js"></script>
+    <script src="../_static/translations.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../_static/design-tabs.js"></script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'lectures/section-07-21';</script>
+    <link rel="shortcut icon" href="../_static/favicon.png"/>
+    <link rel="index" title="索引" href="../genindex.html" />
+    <link rel="search" title="検索" href="../search.html" />
+    <link rel="next" title="画像生成 AI 入門: Python による拡散モデルの理論と実践" href="section-07-22.html" />
+    <link rel="prev" title="画像生成 AI 入門: Python による拡散モデルの理論と実践" href="section-07-20.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ja"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../README.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../README.html">
+                    画像生成 AI 入門：Python による拡散モデルの理論と実践
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-01-03.html">Play with Stable Diffusion!</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-02-05.html">About Deep Learning (2)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-03-08.html">Score-based Generative Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-09.html">Denoising Diffusion Probabilistic Model (1)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-10.html">Denoising Diffusion Probabilistic Model (2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-03-11.html">Beyond Conventional GANs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 4</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-04-12.html">About CLIP</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 6</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-06-18.html">Components of Stable Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 7</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="section-07-19.html">Stable Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-20.html">Textual Inversion</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">DreamBooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-22.html">Attend-and-Excite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-23.html">ControlNet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-24.html">Prompt-to-Prompt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-25.html">InstructPix2Pix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-26.html">unCLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-27.html">Paint-by-example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-28.html">LoRA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="section-07-29.html">Safe Latent Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">受講者特典</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../materials/figures/README.html">高解像度図表</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-07-21.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onColab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="ソースリポジトリ"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models/issues/new?title=Issue%20on%20page%20%2Flectures/section-07-21.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="問題を報告"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="このページをダウンロード">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../_sources/lectures/section-07-21.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="ソースファイルをダウンロード"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="PDFに印刷"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="全画面モード"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="検索" aria-label="検索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>画像生成 AI 入門: Python による拡散モデルの理論と実践</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目次 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-07-play-with-diffusion-model">Section 07. Play with Diffusion Model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-21-dreambooth">Lecture 21. DreamBooth</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">利用する Python ライブラリをインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dreambooth">DreamBooth</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">新たな概念をモデルに教えるための設定</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">学習した概念を元に画像を生成する</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="ai-python">
+<h1>画像生成 AI 入門: Python による拡散モデルの理論と実践<a class="headerlink" href="#ai-python" title="Permalink to this heading">#</a></h1>
+<p><a class="reference external" href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/lectures/section-07-21.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a></p>
+<section id="section-07-play-with-diffusion-model">
+<h2>Section 07. Play with Diffusion Model<a class="headerlink" href="#section-07-play-with-diffusion-model" title="Permalink to this heading">#</a></h2>
+<p>Stable Diffusion を中心とした拡散モデルを用いて、最先端の画像生成技術を実際に動かして実践していきます。</p>
+<section id="lecture-21-dreambooth">
+<h3>Lecture 21. DreamBooth<a class="headerlink" href="#lecture-21-dreambooth" title="Permalink to this heading">#</a></h3>
+<p>DreamBooth <a class="reference external" href="https://arxiv.org/abs/2208.12242">[Ruiz+ CVPR'23]</a> を用いて Stable Diffusion に新しい概念（コンセプト; concept）を「教える」方法を紹介します。</p>
+</section>
+</section>
+<section id="id1">
+<h2>セットアップ<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h2>
+<section id="gpu">
+<h3>GPU が使用できるか確認<a class="headerlink" href="#gpu" title="Permalink to this heading">#</a></h3>
+<p>本 Colab ノートブックを実行するために GPU ランタイムを使用していることを確認します。CPU ランタイムと比べて画像生成がより早くなります。以下の <code class="docutils literal notranslate"><span class="pre">nvidia-smi</span></code> コマンドが失敗する場合は再度講義資料の <code class="docutils literal notranslate"><span class="pre">GPU</span> <span class="pre">使用設定</span></code> のスライド説明や Google Colab の <a class="reference external" href="https://research.google.com/colaboratory/faq.html#gpu-utilization">FAQ</a> 等を参考にランタイムタイプが正しく変更されているか確認してください。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>nvidia-smi
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Sun Jul 30 02:05:23 2023       
++-----------------------------------------------------------------------------+
+| NVIDIA-SMI 525.105.17   Driver Version: 525.105.17   CUDA Version: 12.0     |
+|-------------------------------+----------------------+----------------------+
+| GPU  Name        Persistence-M| Bus-Id        Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp  Perf  Pwr:Usage/Cap|         Memory-Usage | GPU-Util  Compute M. |
+|                               |                      |               MIG M. |
+|===============================+======================+======================|
+|   0  Tesla T4            Off  | 00000000:00:04.0 Off |                    0 |
+| N/A   38C    P8     9W /  70W |      0MiB / 15360MiB |      0%      Default |
+|                               |                      |                  N/A |
++-------------------------------+----------------------+----------------------+
+                                                                               
++-----------------------------------------------------------------------------+
+| Processes:                                                                  |
+|  GPU   GI   CI        PID   Type   Process name                  GPU Memory |
+|        ID   ID                                                   Usage      |
+|=============================================================================|
+|  No running processes found                                                 |
++-----------------------------------------------------------------------------+
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="python">
+<h3>利用する Python ライブラリをインストール<a class="headerlink" href="#python" title="Permalink to this heading">#</a></h3>
+<p>diffusers ライブラリをインストールすることで拡散モデルを簡単に使用できるようにします。diffusers ライブラリを動かす上で必要となるライブラリも追加でインストールします:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/huggingface/transformers">transformers</a>: 拡散モデルにおいて核となる Transformer モデルが定義されているライブラリ</p></li>
+<li><p><a class="reference external" href="https://github.com/huggingface/accelerate">accelerate</a>: transformers と連携してより高速な画像生成をサポートするライブラリ</p></li>
+<li><p><a class="reference external" href="https://github.com/facebookresearch/xformers">xformers</a>: accelerate と同様に、Transformer モデルをより効率的に扱い高速な画像生成をサポートするライブラリ</p></li>
+<li><p><a class="reference external" href="https://github.com/TimDettmers/bitsandbytes">bitsandbytes</a>: 通常単精度 float32 であるところを半精度 float16 よりも少ない 8-bit でのモデルの読み込みが可能なライブラリ</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span><span class="nv">diffusers</span><span class="o">==</span><span class="m">0</span>.16.1
+<span class="o">!</span>pip<span class="w"> </span>install<span class="w"> </span>transformers<span class="w"> </span>accelerate<span class="w"> </span>xformers<span class="w"> </span>bitsandbytes
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Collecting diffusers==0.16.1
+  Downloading diffusers-0.16.1-py3-none-any.whl (934 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">934.9/934.9 kB</span> <span class=" -Color -Color-Red">7.5 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: Pillow in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (9.4.0)
+Requirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (3.12.2)
+Collecting huggingface-hub&gt;=0.13.2 (from diffusers==0.16.1)
+  Downloading huggingface_hub-0.16.4-py3-none-any.whl (268 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">268.8/268.8 kB</span> <span class=" -Color -Color-Red">11.3 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: importlib-metadata in /usr/lib/python3/dist-packages (from diffusers==0.16.1) (4.6.4)
+Requirement already satisfied: numpy in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (1.22.4)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (2022.10.31)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from diffusers==0.16.1) (2.27.1)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (2023.6.0)
+Requirement already satisfied: tqdm&gt;=4.42.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (4.65.0)
+Requirement already satisfied: pyyaml&gt;=5.1 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (6.0.1)
+Requirement already satisfied: typing-extensions&gt;=3.7.4.3 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (4.7.1)
+Requirement already satisfied: packaging&gt;=20.9 in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&gt;=0.13.2-&gt;diffusers==0.16.1) (23.1)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (2023.7.22)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;diffusers==0.16.1) (3.4)
+Installing collected packages: huggingface-hub, diffusers
+Successfully installed diffusers-0.16.1 huggingface-hub-0.16.4
+Collecting transformers
+  Downloading transformers-4.31.0-py3-none-any.whl (7.4 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">7.4/7.4 MB</span> <span class=" -Color -Color-Red">19.0 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting accelerate
+  Downloading accelerate-0.21.0-py3-none-any.whl (244 kB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">244.2/244.2 kB</span> <span class=" -Color -Color-Red">30.0 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting xformers
+  Downloading xformers-0.0.20-cp310-cp310-manylinux2014_x86_64.whl (109.1 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">109.1/109.1 MB</span> <span class=" -Color -Color-Red">1.9 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting bitsandbytes
+  Downloading bitsandbytes-0.41.0-py3-none-any.whl (92.6 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">92.6/92.6 MB</span> <span class=" -Color -Color-Red">9.1 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: filelock in /usr/local/lib/python3.10/dist-packages (from transformers) (3.12.2)
+Requirement already satisfied: huggingface-hub&lt;1.0,&gt;=0.14.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (0.16.4)
+Requirement already satisfied: numpy&gt;=1.17 in /usr/local/lib/python3.10/dist-packages (from transformers) (1.22.4)
+Requirement already satisfied: packaging&gt;=20.0 in /usr/local/lib/python3.10/dist-packages (from transformers) (23.1)
+Requirement already satisfied: pyyaml&gt;=5.1 in /usr/local/lib/python3.10/dist-packages (from transformers) (6.0.1)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/lib/python3.10/dist-packages (from transformers) (2022.10.31)
+Requirement already satisfied: requests in /usr/local/lib/python3.10/dist-packages (from transformers) (2.27.1)
+Collecting tokenizers!=0.11.3,&lt;0.14,&gt;=0.11.1 (from transformers)
+  Downloading tokenizers-0.13.3-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (7.8 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">7.8/7.8 MB</span> <span class=" -Color -Color-Red">100.8 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hCollecting safetensors&gt;=0.3.1 (from transformers)
+  Downloading safetensors-0.3.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (1.3 MB)
+     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ <span class=" -Color -Color-Green">1.3/1.3 MB</span> <span class=" -Color -Color-Red">70.6 MB/s</span> eta <span class=" -Color -Color-Cyan">0:00:00</span>
+?25hRequirement already satisfied: tqdm&gt;=4.27 in /usr/local/lib/python3.10/dist-packages (from transformers) (4.65.0)
+Requirement already satisfied: psutil in /usr/local/lib/python3.10/dist-packages (from accelerate) (5.9.5)
+Requirement already satisfied: torch&gt;=1.10.0 in /usr/local/lib/python3.10/dist-packages (from accelerate) (2.0.1+cu118)
+Collecting pyre-extensions==0.0.29 (from xformers)
+  Downloading pyre_extensions-0.0.29-py3-none-any.whl (12 kB)
+Collecting typing-inspect (from pyre-extensions==0.0.29-&gt;xformers)
+  Downloading typing_inspect-0.9.0-py3-none-any.whl (8.8 kB)
+Requirement already satisfied: typing-extensions in /usr/local/lib/python3.10/dist-packages (from pyre-extensions==0.0.29-&gt;xformers) (4.7.1)
+Requirement already satisfied: sympy in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (1.11.1)
+Requirement already satisfied: networkx in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (3.1)
+Requirement already satisfied: jinja2 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (3.1.2)
+Requirement already satisfied: triton==2.0.0 in /usr/local/lib/python3.10/dist-packages (from torch&gt;=1.10.0-&gt;accelerate) (2.0.0)
+Requirement already satisfied: cmake in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate) (3.25.2)
+Requirement already satisfied: lit in /usr/local/lib/python3.10/dist-packages (from triton==2.0.0-&gt;torch&gt;=1.10.0-&gt;accelerate) (16.0.6)
+Requirement already satisfied: fsspec in /usr/local/lib/python3.10/dist-packages (from huggingface-hub&lt;1.0,&gt;=0.14.1-&gt;transformers) (2023.6.0)
+Requirement already satisfied: urllib3&lt;1.27,&gt;=1.21.1 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (1.26.16)
+Requirement already satisfied: certifi&gt;=2017.4.17 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (2023.7.22)
+Requirement already satisfied: charset-normalizer~=2.0.0 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (2.0.12)
+Requirement already satisfied: idna&lt;4,&gt;=2.5 in /usr/local/lib/python3.10/dist-packages (from requests-&gt;transformers) (3.4)
+Requirement already satisfied: MarkupSafe&gt;=2.0 in /usr/local/lib/python3.10/dist-packages (from jinja2-&gt;torch&gt;=1.10.0-&gt;accelerate) (2.1.3)
+Requirement already satisfied: mpmath&gt;=0.19 in /usr/local/lib/python3.10/dist-packages (from sympy-&gt;torch&gt;=1.10.0-&gt;accelerate) (1.3.0)
+Collecting mypy-extensions&gt;=0.3.0 (from typing-inspect-&gt;pyre-extensions==0.0.29-&gt;xformers)
+  Downloading mypy_extensions-1.0.0-py3-none-any.whl (4.7 kB)
+Installing collected packages: tokenizers, safetensors, bitsandbytes, mypy-extensions, typing-inspect, transformers, pyre-extensions, xformers, accelerate
+Successfully installed accelerate-0.21.0 bitsandbytes-0.41.0 mypy-extensions-1.0.0 pyre-extensions-0.0.29 safetensors-0.3.1 tokenizers-0.13.3 transformers-4.31.0 typing-inspect-0.9.0 xformers-0.0.20
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="dreambooth">
+<h2>DreamBooth<a class="headerlink" href="#dreambooth" title="Permalink to this heading">#</a></h2>
+<p>本セクションでは <a class="reference external" href="https://github.com/huggingface/notebooks/blob/main/diffusers/sd_dreambooth_training.ipynb">Dreambooth fine-tuning for Stable Diffusion using d🧨ffusers</a> を参考に、dreambooth の動作を追っていきます。</p>
+<p>前回の講義で取り扱った Textual Inversion とは異なり、本手法はモデル全体を学習させるため学習に利用できるパラメータ数が増えることになり結果的によりよい画像を生成することが可能です。一方で学習するパラメータが増えることで学習時間も長くなります。</p>
+<p>まず準備として画像を複数生成した場合に結果を確認しやすいように、画像をグリッド上に表示する関数を以下のように定義します。この関数は <a class="reference external" href="https://huggingface.co/blog/stable_diffusion">🤗 Hugging Face Stable Diffusion</a> のブログ記事のものを利用しています。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">PIL.Image</span> <span class="kn">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">PilImage</span>
+
+<span class="k">def</span> <span class="nf">image_grid</span><span class="p">(</span><span class="n">imgs</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PilImage</span><span class="p">],</span> <span class="n">rows</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">cols</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PilImage</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">imgs</span><span class="p">)</span> <span class="o">==</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">cols</span>
+
+    <span class="n">w</span><span class="p">,</span> <span class="n">h</span> <span class="o">=</span> <span class="n">imgs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;RGB&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">cols</span> <span class="o">*</span> <span class="n">w</span><span class="p">,</span> <span class="n">rows</span> <span class="o">*</span> <span class="n">h</span><span class="p">))</span>
+    <span class="n">grid_w</span><span class="p">,</span> <span class="n">grid_h</span> <span class="o">=</span> <span class="n">grid</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">imgs</span><span class="p">):</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">paste</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">box</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="k">cols</span>*w, i//cols*h))
+    <span class="k">return</span> <span class="n">grid</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="id2">
+<h3>新たな概念をモデルに教えるための設定<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h3>
+<p>使用する事前学習済み拡散モデルを指定します。今回は <a class="reference external" href="https://huggingface.co/runwayml/stable-diffusion-v1-5"><code class="docutils literal notranslate"><span class="pre">runwayml/stable-diffusion-v1-5</span></code></a> を選択しました。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">model_id</span> <span class="o">=</span> <span class="s2">&quot;runwayml/stable-diffusion-v1-5&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Google drive にデータを保存する設定を行います。<code class="docutils literal notranslate"><span class="pre">Files</span></code> タブから google drive に用意した画像を読み込むことも可能ですが、今回は google drive をマウントし、そこから drive 上に保存した画像を読み込む方法を検討します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">google.colab</span> <span class="kn">import</span> <span class="n">drive</span>
+
+<span class="c1"># /content/drive をマウントする</span>
+<span class="n">DRIVE_PATH</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s2">&quot;content&quot;</span><span class="p">,</span> <span class="s2">&quot;drive&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mount the following directory: </span><span class="si">{</span><span class="n">DRIVE_PATH</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">drive</span><span class="o">.</span><span class="n">mount</span><span class="p">(</span><span class="n">DRIVE_PATH</span><span class="p">)</span>
+
+<span class="c1">#</span>
+<span class="c1"># 本 notebook 用のデータを格納するディレクトリを作成する</span>
+<span class="c1"># まずベースとなるディレクトリとして以下のようなディレクリを作成する:</span>
+<span class="c1"># /content/drive/MyDrive/colab-notebooks/oloso/practice</span>
+<span class="c1">#</span>
+<span class="n">base_dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">DRIVE_PATH</span><span class="p">,</span> <span class="s2">&quot;MyDrive&quot;</span><span class="p">,</span> <span class="s2">&quot;colab-notebooks&quot;</span><span class="p">,</span> <span class="s2">&quot;coloso&quot;</span><span class="p">,</span> <span class="s2">&quot;practice&quot;</span><span class="p">)</span>
+<span class="c1">#</span>
+<span class="c1"># 次に講義用のディレクトリを作成する。今回は第 20 講なので `lecture-21` と命名する:</span>
+<span class="c1"># /content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21</span>
+<span class="c1">#</span>
+<span class="n">lecture_dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">base_dir_path</span><span class="p">,</span> <span class="s2">&quot;lecture-21&quot;</span><span class="p">)</span>
+
+<span class="c1">#</span>
+<span class="c1"># 今回使用する学習画像を保存するディレクトリを作成する:</span>
+<span class="c1"># /content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21/sample-images</span>
+<span class="c1">#</span>
+<span class="n">sample_image_dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lecture_dir_path</span><span class="p">,</span> <span class="s2">&quot;sample-images&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The images will be saved in the following path: </span><span class="si">{</span><span class="n">sample_image_dir_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="c1"># 上記のディレクトリが存在しない場合は作成する</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sample_image_dir_path</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">sample_image_dir_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Mount the following directory: /content/drive
+Mounted at /content/drive
+The images will be saved in the following path: /content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21/sample-images
+</pre></div>
+</div>
+</div>
+</div>
+<p>学習に使用するデータを用意します。今回は textual inversion にも登場している猫のおもちゃを <a class="reference external" href="https://huggingface.co/datasets/diffusers/cat_toy_example">huggingface dataset</a> 上からダウンロードしてきます。ここではまず Colab 上でダウンロードしたのちに、google drive に保存する方法を取ります。以下の <code class="docutils literal notranslate"><span class="pre">urls</span></code> に学習したい概念の画像の URL を追加してください。dreambooth は数枚の画像で学習が可能であるため、3 〜 5 枚で十分です。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">urls</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;https://huggingface.co/datasets/diffusers/cat_toy_example/resolve/main/1.jpeg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://huggingface.co/datasets/diffusers/cat_toy_example/resolve/main/2.jpeg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://huggingface.co/datasets/diffusers/cat_toy_example/resolve/main/3.jpeg&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;https://huggingface.co/datasets/diffusers/cat_toy_example/resolve/main/4.jpeg&quot;</span><span class="p">,</span>
+    <span class="c1">#</span>
+    <span class="c1"># ここに更に画像を追加することができます</span>
+    <span class="c1">#</span>
+    <span class="c1"># &quot;https://huggingface.co/datasets/diffusers/cat_toy_example/resolve/main/5.jpeg&quot;,</span>
+    <span class="c1"># &quot;https://huggingface.co/datasets/diffusers/cat_toy_example/resolve/main/6.jpeg&quot;,</span>
+    <span class="c1"># &quot;https://huggingface.co/datasets/diffusers/cat_toy_example/resolve/main/7.jpeg&quot;,</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>オンラインにある画像をダウンロードする関数を以下のように定義します。この関数を使って上記の <code class="docutils literal notranslate"><span class="pre">urls</span></code> で指定した画像をインターネット上からダウンロードします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="k">def</span> <span class="nf">download_image</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PilImage</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">urls</span><span class="p">):</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">download_image</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+    <span class="n">image_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_image_dir_path</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">.jpg&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The image is saved in the following path: </span><span class="si">{</span><span class="n">image_filepath</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">image_filepath</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>The image is saved in the following path: /content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21/sample-images/0.jpg
+The image is saved in the following path: /content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21/sample-images/1.jpg
+The image is saved in the following path: /content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21/sample-images/2.jpg
+The image is saved in the following path: /content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21/sample-images/3.jpg
+</pre></div>
+</div>
+</div>
+</div>
+<p>準備した画像を確認してみます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">images</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">PilImage</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">sample_image_dir_path</span><span class="p">):</span>
+    <span class="n">image_filepath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sample_image_dir_path</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_filepath</span><span class="p">)</span>
+    <span class="n">image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">resize</span><span class="p">((</span><span class="mi">512</span><span class="p">,</span> <span class="mi">512</span><span class="p">))</span>
+    <span class="n">images</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+
+<span class="n">image_grid</span><span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">rows</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">cols</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">images</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Output hidden; open in https://colab.research.google.com to view.
+</pre></div>
+</div>
+</div>
+</div>
+<p>学習したい概念に対する dreambooth の設定を行います。特に dreambooth では事前学習によって得られている事前知識を保存するかを指定するパラメータが存在します。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">instance_prompt</span></code> には学習させたい概念を適切に説明し、なおかつ初期化トークン (initializer token) である <code class="docutils literal notranslate"><span class="pre">&lt;cat-toy&gt;</span></code> が含まれている必要があります。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">is_prior_preservation</span></code> には概念のクラス（例: おもちゃ、犬、絵画等）が保存されることを保証したい場合に使用します。学習時間が少し伸びますが、生成品質が向上します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prior_preservation_class_prompt</span></code> には概念のクラスを保存するために利用するプロンプトを指定します。</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">instance_prompt</span> <span class="o">=</span> <span class="s2">&quot;&lt;cat-toy&gt; toy&quot;</span>
+
+<span class="n">is_prior_preservation</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">prior_preservation_class_prompt</span> <span class="o">=</span> <span class="s2">&quot;a photo of a cat clay toy&quot;</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>以下では事前知識の保存に関するハイパーパラメータを指定します。</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">num_class_images</span></code> には知識保存するクラスの画像を指定します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prior_loss_weight</span></code> には知識保存するクラスに対する損失の重みを指定します。</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">prior_preservation_class_folder</span></code> には知識保存する画像の格納先を指定します。</p></li>
+</ul>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">num_class_images</span> <span class="o">=</span> <span class="mi">12</span>
+<span class="n">prior_loss_weight</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">prior_preservation_class_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lecture_dir_path</span><span class="p">,</span> <span class="s2">&quot;class-images&quot;</span><span class="p">)</span>
+<span class="c1"># class_data_root = prior_preservation_class_dir</span>
+<span class="c1"># class_prompt = prior_preservation_class_prompt</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypedDict</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">torchvision</span> <span class="kn">import</span> <span class="n">transforms</span>
+<span class="kn">from</span> <span class="nn">transformers.tokenization_utils</span> <span class="kn">import</span> <span class="n">PreTrainedTokenizer</span>
+
+<span class="c1">#</span>
+<span class="c1"># 加工したデータセットを辞書型のデータに加工する際に</span>
+<span class="c1"># key の定義と対応する value の型アノテーションを宣言</span>
+<span class="c1">#</span>
+<span class="c1"># 以下のように宣言することで、想定とは異なるデータが</span>
+<span class="c1"># 入ってきた場合にエラーを出すことができる</span>
+<span class="c1">#</span>
+<span class="k">class</span> <span class="nc">ExampleRequired</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">instance_images</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="n">instance_prompt_ids</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+
+
+<span class="k">class</span> <span class="nc">Example</span><span class="p">(</span><span class="n">ExampleRequired</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">class_images</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="n">class_prompt_ids</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+
+
+<span class="k">class</span> <span class="nc">DreamBoothDataset</span><span class="p">(</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">instance_data_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">instance_prompt</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">tokenizer</span><span class="p">:</span> <span class="n">PreTrainedTokenizer</span><span class="p">,</span>
+        <span class="n">class_data_root</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">class_prompt</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">image_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">512</span><span class="p">,</span>
+        <span class="n">is_center_crop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_size</span> <span class="o">=</span> <span class="n">image_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_center_crop</span> <span class="o">=</span> <span class="n">is_center_crop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span> <span class="o">=</span> <span class="n">tokenizer</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_data_root</span> <span class="o">=</span> <span class="n">instance_data_root</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_data_root</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;The following `instance_data_root` does not exists: &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_data_root</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_image_paths</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_data_root</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_data_root</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_instance_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">instance_image_paths</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">instance_prompt</span> <span class="o">=</span> <span class="n">instance_prompt</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_instance_images</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># class preservation まわりの設定</span>
+        <span class="c1">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_data_root</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">class_data_root</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">class_data_root</span> <span class="o">=</span> <span class="n">class_data_root</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_data_root</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">class_image_paths</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_data_root</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_data_root</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_class_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_image_paths</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">data_length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_class_images</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_instance_images</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">class_prompt</span> <span class="o">=</span> <span class="n">class_prompt</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># 前処理の設定</span>
+        <span class="c1">#</span>
+        <span class="n">transform_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Resize</span><span class="p">(</span><span class="n">image_size</span><span class="p">,</span> <span class="n">interpolation</span><span class="o">=</span><span class="n">transforms</span><span class="o">.</span><span class="n">InterpolationMode</span><span class="o">.</span><span class="n">BILINEAR</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">CenterCrop</span><span class="p">(</span><span class="n">image_size</span><span class="p">)</span> <span class="k">if</span> <span class="n">is_center_crop</span> <span class="k">else</span> <span class="n">transforms</span><span class="o">.</span><span class="n">RandomCrop</span><span class="p">(</span><span class="n">image_size</span><span class="p">),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">ToTensor</span><span class="p">(),</span>
+            <span class="n">transforms</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">mean</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">],</span> <span class="n">std</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">]),</span>
+        <span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">image_transforms</span> <span class="o">=</span> <span class="n">transforms</span><span class="o">.</span><span class="n">Compose</span><span class="p">(</span><span class="n">transform_list</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset_length</span>
+
+    <span class="k">def</span> <span class="nf">load_image</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">image_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+        <span class="n">image_pil</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">image_pil</span><span class="o">.</span><span class="n">mode</span> <span class="o">==</span> <span class="s2">&quot;RGB&quot;</span><span class="p">:</span>
+            <span class="n">image_pil</span> <span class="o">=</span> <span class="n">image_pil</span><span class="o">.</span><span class="n">convert</span><span class="p">(</span><span class="s2">&quot;RGB&quot;</span><span class="p">)</span>
+
+        <span class="c1"># 前処理を実施</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">image_transforms</span><span class="p">(</span><span class="n">image_pil</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Example</span><span class="p">:</span>
+        <span class="c1">#</span>
+        <span class="c1"># 画像の読み込み</span>
+        <span class="c1">#</span>
+        <span class="n">instance_image_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">instance_image_paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_instance_images</span><span class="p">]</span>
+        <span class="n">instance_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_image</span><span class="p">(</span><span class="n">instance_image_path</span><span class="p">)</span>
+        <span class="c1">#</span>
+        <span class="c1"># プロンプトのトークナイズ</span>
+        <span class="c1">#</span>
+        <span class="n">instance_prompt_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">instance_prompt</span><span class="p">,</span>
+            <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;do_not_pad&quot;</span><span class="p">,</span>
+            <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">max_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">input_ids</span>
+
+        <span class="c1"># 入力するデータを辞書型に詰め込む</span>
+        <span class="n">example</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;instance_images&quot;</span><span class="p">:</span> <span class="n">instance_image</span><span class="p">,</span>
+            <span class="s2">&quot;instance_prompt_ids&quot;</span><span class="p">:</span> <span class="n">instance_prompt_ids</span>
+        <span class="p">}</span>
+
+        <span class="c1">#</span>
+        <span class="c1"># class preservation まわりの処理</span>
+        <span class="c1">#</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_data_root</span><span class="p">:</span>
+            <span class="n">class_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_image</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">class_image_paths</span><span class="p">[</span><span class="n">idx</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_class_images</span><span class="p">])</span>
+            <span class="n">class_prompt_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">class_prompt</span><span class="p">,</span>
+                <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;do_not_pad&quot;</span><span class="p">,</span>
+                <span class="n">truncation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">max_length</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span><span class="p">,</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">input_ids</span>
+
+            <span class="n">example</span><span class="p">[</span><span class="s2">&quot;class_images&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_image</span>
+            <span class="n">example</span><span class="p">[</span><span class="s2">&quot;class_prompt_ids&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_prompt_ids</span>
+
+        <span class="k">return</span> <span class="n">example</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>class preservation で使用する画像を生成します。これを使用することで、元々生成出来ていた画像を忘れずに、新たに入力する概念を学習することが可能です。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">gc</span>
+<span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">StableDiffusionPipeline</span>
+<span class="kn">from</span> <span class="nn">tqdm.auto</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="k">def</span> <span class="nf">generate_class_images</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">prior_preservation_class_dir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">prior_preservation_class_dir</span><span class="p">)</span>
+    <span class="n">cur_class_images</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">prior_preservation_class_dir</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">cur_class_images</span> <span class="o">&gt;=</span> <span class="n">num_class_images</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">pipe</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+        <span class="n">model_id</span><span class="p">,</span> <span class="n">revision</span><span class="o">=</span><span class="s2">&quot;fp16&quot;</span><span class="p">,</span> <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span>
+    <span class="p">)</span>
+    <span class="n">pipe</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+
+    <span class="n">pipe</span><span class="o">.</span><span class="n">enable_attention_slicing</span><span class="p">()</span>
+    <span class="n">pipe</span><span class="o">.</span><span class="n">set_progress_bar_config</span><span class="p">(</span><span class="n">disable</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">num_new_images</span> <span class="o">=</span> <span class="n">num_class_images</span> <span class="o">-</span> <span class="n">cur_class_images</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of class images to sample: </span><span class="si">{</span><span class="n">num_new_images</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_new_images</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Generating class images&quot;</span><span class="p">):</span>
+        <span class="n">images</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span>
+            <span class="n">prompt</span><span class="o">=</span><span class="n">prior_preservation_class_prompt</span><span class="p">,</span>
+            <span class="n">num_images_per_prompt</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">images</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">image</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">images</span><span class="p">):</span>
+            <span class="n">image_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">prior_preservation_class_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cur_class_images</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">idx</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">i</span><span class="si">}</span><span class="s2">.jpg&quot;</span><span class="p">)</span>
+            <span class="n">image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The generated image is saved in the following path: </span><span class="si">{</span><span class="n">image_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">pipe</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">del</span> <span class="n">pipe</span>
+    <span class="n">gc</span><span class="o">.</span><span class="n">collect</span><span class="p">()</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+
+<span class="n">generate_class_images</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>Stable Diffusion で学習されたコンポーネントをそれぞれ読み込みます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">AutoencoderKL</span><span class="p">,</span> <span class="n">UNet2DConditionModel</span>
+<span class="kn">from</span> <span class="nn">transformers</span> <span class="kn">import</span> <span class="n">CLIPTokenizer</span><span class="p">,</span> <span class="n">CLIPTextModel</span>
+
+<span class="n">text_encoder</span> <span class="o">=</span> <span class="n">CLIPTextModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;text_encoder&quot;</span><span class="p">)</span>
+<span class="n">vae</span> <span class="o">=</span> <span class="n">AutoencoderKL</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;vae&quot;</span><span class="p">)</span>
+<span class="n">unet</span> <span class="o">=</span> <span class="n">UNet2DConditionModel</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;unet&quot;</span><span class="p">)</span>
+<span class="n">tokenizer</span> <span class="o">=</span> <span class="n">CLIPTokenizer</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;tokenizer&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "7620694f4c704bceb443a9fbf475a535"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "cab667f61cf640b2af68ad8b00b0c661"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "55404c6e0d1b4e9095844d325d2ac68d"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "b4134110c83d41c9ac9501c98a6fbbaa"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "a5f888995d2e4276b1912c7b8d352dec"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "ce3fca03e01942d4ab22ef8b52dc1467"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "dcdc775585d448b5b6b7cdfea5930648"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "e8b5b79b82004fdfa46d5f53a6fbe1da"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "0496efd4042c4b4bb29ff26f18a91847"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "ca8829d6ac29462d92db87615600b67b"}</script></div>
+</div>
+<p>学習データを、上記で定義した <code class="docutils literal notranslate"><span class="pre">DreamBoothDataset</span></code> を元に作成します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_dataset</span> <span class="o">=</span> <span class="n">DreamBoothDataset</span><span class="p">(</span>
+    <span class="n">instance_data_root</span><span class="o">=</span><span class="n">sample_image_dir_path</span><span class="p">,</span>
+    <span class="n">instance_prompt</span><span class="o">=</span><span class="n">instance_prompt</span><span class="p">,</span>
+    <span class="n">class_data_root</span><span class="o">=</span><span class="n">prior_preservation_class_dir</span> <span class="k">if</span> <span class="n">is_prior_preservation</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">class_prompt</span><span class="o">=</span><span class="n">prior_preservation_class_prompt</span><span class="p">,</span>
+    <span class="n">tokenizer</span><span class="o">=</span><span class="n">tokenizer</span><span class="p">,</span>
+    <span class="n">image_size</span><span class="o">=</span><span class="n">vae</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sample_size</span><span class="p">,</span>
+    <span class="n">is_center_crop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>学習時に付与するノイズを制御するスケジューラを定義します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">DDPMScheduler</span>
+
+<span class="n">noise_scheduler</span> <span class="o">=</span> <span class="n">DDPMScheduler</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">model_id</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;scheduler&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "b1724ce1cd624bf1a4b93809d0506a3a"}</script></div>
+</div>
+<p>学習の準備を行います。ハイパーパラメータを以下のように定義します。モデルを学習して生成結果を確認したときに結果が悪かった場合は、<code class="docutils literal notranslate"><span class="pre">learning_rate</span></code> や <code class="docutils literal notranslate"><span class="pre">max_train_steps</span></code> の調整を検討してみてください。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">Hyperparameter</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span>
+    <span class="n">max_train_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">300</span>
+    <span class="n">train_text_encoder</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">train_batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span> <span class="c1"># 事前知識の保存を行う場合はバッチサイズを 1 にしてください</span>
+    <span class="n">gradient_accumulation_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">gradient_checkpointing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">max_grad_norm</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+    <span class="n">mixed_precision</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fp16&quot;</span>
+    <span class="n">use_8bit_adam</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span> <span class="c1"># `bitsandbytes` による 8-bit 最適化を利用</span>
+    <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">19950815</span>
+    <span class="n">lr_scheduler</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;constant&quot;</span>
+    <span class="n">lr_warmup_steps</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span>
+    <span class="n">output_dir_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lecture_dir_path</span><span class="p">,</span> <span class="s2">&quot;sd-dreambooth-output&quot;</span><span class="p">)</span>
+
+<span class="n">hparams</span> <span class="o">=</span> <span class="n">Hyperparameter</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">hparams</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Hyperparameter(learning_rate=1e-06, max_train_steps=300, train_text_encoder=False, train_batch_size=1, gradient_accumulation_steps=1, gradient_checkpointing=True, max_grad_norm=1.0, mixed_precision=&#39;fp16&#39;, use_8bit_adam=True, seed=19950815, lr_scheduler=&#39;constant&#39;, lr_warmup_steps=100, output_dir_path=&#39;/content/drive/MyDrive/colab-notebooks/coloso/practice/lecture-21/sd-dreambooth-output&#39;)
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">import</span> <span class="nn">bitsandbytes</span> <span class="k">as</span> <span class="nn">bnb</span>
+
+<span class="kn">from</span> <span class="nn">accelerate</span> <span class="kn">import</span> <span class="n">Accelerator</span>
+<span class="kn">from</span> <span class="nn">accelerate.logging</span> <span class="kn">import</span> <span class="n">get_logger</span>
+<span class="kn">from</span> <span class="nn">accelerate.utils</span> <span class="kn">import</span> <span class="n">set_seed</span>
+<span class="kn">from</span> <span class="nn">diffusers.optimization</span> <span class="kn">import</span> <span class="n">get_scheduler</span>
+<span class="kn">import</span> <span class="nn">torch.nn.functional</span> <span class="k">as</span> <span class="nn">F</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">get_logger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="k">class</span> <span class="nc">BatchDict</span><span class="p">(</span><span class="n">TypedDict</span><span class="p">):</span>
+    <span class="n">input_ids</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="n">pixel_values</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+
+
+<span class="k">def</span> <span class="nf">collate_fn</span><span class="p">(</span><span class="n">examples</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Example</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">BatchDict</span><span class="p">:</span>
+    <span class="n">input_ids</span> <span class="o">=</span> <span class="p">[</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;instance_prompt_ids&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">]</span>
+    <span class="n">pixel_values</span> <span class="o">=</span> <span class="p">[</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;instance_images&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">]</span>
+
+    <span class="c1"># concat class and instance examples for prior preservation</span>
+    <span class="k">if</span> <span class="n">is_prior_preservation</span><span class="p">:</span>
+        <span class="n">input_ids</span> <span class="o">+=</span> <span class="p">[</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;class_prompt_ids&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">]</span>
+        <span class="n">pixel_values</span> <span class="o">+=</span> <span class="p">[</span><span class="n">example</span><span class="p">[</span><span class="s2">&quot;class_images&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">example</span> <span class="ow">in</span> <span class="n">examples</span><span class="p">]</span>
+
+    <span class="n">pixel_values</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">pixel_values</span><span class="p">)</span>
+    <span class="n">pixel_values</span> <span class="o">=</span> <span class="n">pixel_values</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">memory_format</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">contiguous_format</span><span class="p">)</span><span class="o">.</span><span class="n">float</span><span class="p">()</span>
+
+    <span class="n">input_ids</span> <span class="o">=</span> <span class="n">tokenizer</span><span class="o">.</span><span class="n">pad</span><span class="p">(</span>
+        <span class="p">{</span><span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">input_ids</span><span class="p">},</span>
+        <span class="n">padding</span><span class="o">=</span><span class="s2">&quot;max_length&quot;</span><span class="p">,</span>
+        <span class="n">return_tensors</span><span class="o">=</span><span class="s2">&quot;pt&quot;</span><span class="p">,</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">model_max_length</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">input_ids</span>
+
+    <span class="n">batch</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;input_ids&quot;</span><span class="p">:</span> <span class="n">input_ids</span><span class="p">,</span>
+        <span class="s2">&quot;pixel_values&quot;</span><span class="p">:</span> <span class="n">pixel_values</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">batch</span>
+
+
+<span class="k">def</span> <span class="nf">training_function</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">,</span> <span class="n">vae</span><span class="p">,</span> <span class="n">unet</span><span class="p">):</span>
+
+    <span class="c1"># 学習の再現性を確保するために乱数の seed を固定</span>
+    <span class="n">set_seed</span><span class="p">(</span><span class="n">hparams</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="n">accelerator</span> <span class="o">=</span> <span class="n">Accelerator</span><span class="p">(</span>
+        <span class="n">gradient_accumulation_steps</span><span class="o">=</span><span class="n">hparams</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span><span class="p">,</span>
+        <span class="n">mixed_precision</span><span class="o">=</span><span class="n">hparams</span><span class="o">.</span><span class="n">mixed_precision</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># 2023/07 現在 `accelerate.accumulate` で 2 つのモデルを学習する際に</span>
+    <span class="c1"># gradient accmuleration を使用することができません。これは `accelerate` でまもなく使用できるようになるようです</span>
+    <span class="c1"># 対象の機能が導入されたら、将来的に以下のチェックを無効にすることを検討してください:</span>
+    <span class="k">if</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_text_encoder</span> <span class="ow">and</span> <span class="n">hparams</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">num_processes</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Gradient accumulation is not supported when training the text encoder in distributed training. &quot;</span>
+            <span class="s2">&quot;Please set gradient_accumulation_steps to 1. This feature will be supported in the future.&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># VAE のパラメータを固定</span>
+    <span class="n">vae</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+    <span class="c1"># Text Encoder のパラメータを固定するか判定</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_text_encoder</span><span class="p">:</span>
+        <span class="n">text_encoder</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">hparams</span><span class="o">.</span><span class="n">gradient_checkpointing</span><span class="p">:</span>
+        <span class="n">unet</span><span class="o">.</span><span class="n">enable_gradient_checkpointing</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_text_encoder</span><span class="p">:</span>
+            <span class="n">text_encoder</span><span class="o">.</span><span class="n">gradient_checkpointing_enable</span><span class="p">()</span>
+
+    <span class="c1"># Colab の T5 GPU のような、16 GB 以下の GPU RAM の場合は</span>
+    <span class="c1"># fine-tuning 時のメモリ使用量を減らすために 8-bit の Adam optimizer を使用</span>
+    <span class="k">if</span> <span class="n">hparams</span><span class="o">.</span><span class="n">use_8bit_adam</span><span class="p">:</span>
+        <span class="n">optimizer_class</span> <span class="o">=</span> <span class="n">bnb</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW8bit</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">optimizer_class</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span>
+
+    <span class="n">params_to_optimize</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">unet</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">text_encoder</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_text_encoder</span>
+        <span class="k">else</span> <span class="n">unet</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer_class</span><span class="p">(</span>
+        <span class="n">params_to_optimize</span><span class="p">,</span>
+        <span class="n">lr</span><span class="o">=</span><span class="n">hparams</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span>
+        <span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">hparams</span><span class="o">.</span><span class="n">train_batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">collate_fn</span><span class="o">=</span><span class="n">collate_fn</span>
+    <span class="p">)</span>
+
+    <span class="n">lr_scheduler</span> <span class="o">=</span> <span class="n">get_scheduler</span><span class="p">(</span>
+        <span class="n">hparams</span><span class="o">.</span><span class="n">lr_scheduler</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+        <span class="n">num_warmup_steps</span><span class="o">=</span><span class="n">hparams</span><span class="o">.</span><span class="n">lr_warmup_steps</span> <span class="o">*</span> <span class="n">hparams</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span><span class="p">,</span>
+        <span class="n">num_training_steps</span><span class="o">=</span><span class="n">hparams</span><span class="o">.</span><span class="n">max_train_steps</span> <span class="o">*</span> <span class="n">hparams</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_text_encoder</span><span class="p">:</span>
+        <span class="n">unet</span><span class="p">,</span> <span class="n">text_encoder</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">lr_scheduler</span> <span class="o">=</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span>
+            <span class="n">unet</span><span class="p">,</span> <span class="n">text_encoder</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">lr_scheduler</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unet</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">lr_scheduler</span> <span class="o">=</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">prepare</span><span class="p">(</span>
+            <span class="n">unet</span><span class="p">,</span> <span class="n">optimizer</span><span class="p">,</span> <span class="n">train_dataloader</span><span class="p">,</span> <span class="n">lr_scheduler</span>
+        <span class="p">)</span>
+
+    <span class="n">weight_dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float32</span>
+    <span class="k">if</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">mixed_precision</span> <span class="o">==</span> <span class="s2">&quot;fp16&quot;</span><span class="p">:</span>
+        <span class="n">weight_dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">float16</span>
+    <span class="k">elif</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">mixed_precision</span> <span class="o">==</span> <span class="s2">&quot;bf16&quot;</span><span class="p">:</span>
+        <span class="n">weight_dtype</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">bfloat16</span>
+
+    <span class="c1"># VAE と Text Encoder を GPU に移動</span>
+    <span class="c1"># Mixed Precision Training (混合精度学習) のために、`vae` と `text_encoder` の重みを</span>
+    <span class="c1"># 半精度 (float16) にキャストします。これらのモデルは推論にのみ使用されるため</span>
+    <span class="c1"># 単精度 (float32) の重みである必要はありません</span>
+    <span class="n">vae</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">accelerator</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">weight_dtype</span><span class="p">)</span>
+    <span class="n">vae</span><span class="o">.</span><span class="n">decoder</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cpu&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_text_encoder</span><span class="p">:</span>
+        <span class="n">text_encoder</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">accelerator</span><span class="o">.</span><span class="n">device</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">weight_dtype</span><span class="p">)</span>
+
+    <span class="c1"># 学習用データローダーのサイズが gradient accumulation の数によって変わる可能性があるため</span>
+    <span class="c1"># ここで再度学習ステップ数を計算し直す</span>
+    <span class="n">num_update_steps_per_epoch</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">)</span> <span class="o">/</span> <span class="n">hparams</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span><span class="p">)</span>
+    <span class="n">num_train_epochs</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">hparams</span><span class="o">.</span><span class="n">max_train_steps</span> <span class="o">/</span> <span class="n">num_update_steps_per_epoch</span><span class="p">)</span>
+
+    <span class="c1"># Train!</span>
+    <span class="n">total_batch_size</span> <span class="o">=</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_batch_size</span> <span class="o">*</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">num_processes</span> <span class="o">*</span> <span class="n">hparams</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;***** Running training *****&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Num examples = </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Instantaneous batch size per device = </span><span class="si">{</span><span class="n">hparams</span><span class="o">.</span><span class="n">train_batch_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total train batch size (w. parallel, distributed &amp; accumulation) = </span><span class="si">{</span><span class="n">total_batch_size</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Gradient Accumulation steps = </span><span class="si">{</span><span class="n">hparams</span><span class="o">.</span><span class="n">gradient_accumulation_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  Total optimization steps = </span><span class="si">{</span><span class="n">hparams</span><span class="o">.</span><span class="n">max_train_steps</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">progress_bar</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">hparams</span><span class="o">.</span><span class="n">max_train_steps</span><span class="p">),</span> <span class="n">disable</span><span class="o">=</span><span class="ow">not</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">is_local_main_process</span><span class="p">)</span>
+    <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_description</span><span class="p">(</span><span class="s2">&quot;Steps&quot;</span><span class="p">)</span>
+    <span class="n">global_step</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_train_epochs</span><span class="p">):</span>
+        <span class="n">unet</span><span class="o">.</span><span class="n">train</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">step</span><span class="p">,</span> <span class="n">batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">train_dataloader</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">accumulate</span><span class="p">(</span><span class="n">unet</span><span class="p">):</span>
+                <span class="c1"># 画像を潜在データへ変換</span>
+                <span class="n">latents</span> <span class="o">=</span> <span class="n">vae</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;pixel_values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">dtype</span><span class="o">=</span><span class="n">weight_dtype</span><span class="p">))</span><span class="o">.</span><span class="n">latent_dist</span><span class="o">.</span><span class="n">sample</span><span class="p">()</span>
+                <span class="n">latents</span> <span class="o">=</span> <span class="n">latents</span> <span class="o">*</span> <span class="mf">0.18215</span>
+
+                <span class="c1"># 潜在データへ追加するノイズを取得</span>
+                <span class="n">noise</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randn_like</span><span class="p">(</span><span class="n">latents</span><span class="p">)</span>
+                <span class="n">bsz</span> <span class="o">=</span> <span class="n">latents</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="c1"># 各画像に対してランダムなタイムステップ数を取得</span>
+                <span class="n">timesteps</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">noise_scheduler</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">num_train_timesteps</span><span class="p">,</span> <span class="p">(</span><span class="n">bsz</span><span class="p">,),</span> <span class="n">device</span><span class="o">=</span><span class="n">latents</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">timesteps</span> <span class="o">=</span> <span class="n">timesteps</span><span class="o">.</span><span class="n">long</span><span class="p">()</span>
+
+                <span class="c1"># 各タイムステップにおけるノイズの大きさに従って</span>
+                <span class="c1"># 潜在データにノイズを追加 (拡散過程)</span>
+                <span class="n">noisy_latents</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="o">.</span><span class="n">add_noise</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
+
+                <span class="c1"># 条件付のためのプロンプトからテキストベクトルを取得</span>
+                <span class="n">encoder_hidden_states</span> <span class="o">=</span> <span class="n">text_encoder</span><span class="p">(</span><span class="n">batch</span><span class="p">[</span><span class="s2">&quot;input_ids&quot;</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span>
+
+                <span class="c1"># ノイズを予測</span>
+                <span class="n">noise_pred</span> <span class="o">=</span> <span class="n">unet</span><span class="p">(</span><span class="n">noisy_latents</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">,</span> <span class="n">encoder_hidden_states</span><span class="p">)</span><span class="o">.</span><span class="n">sample</span>
+
+                <span class="c1"># 予測タイプに応じた損失を計算</span>
+                <span class="k">if</span> <span class="n">noise_scheduler</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="s2">&quot;epsilon&quot;</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">noise</span>
+                <span class="k">elif</span> <span class="n">noise_scheduler</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">prediction_type</span> <span class="o">==</span> <span class="s2">&quot;v_prediction&quot;</span><span class="p">:</span>
+                    <span class="n">target</span> <span class="o">=</span> <span class="n">noise_scheduler</span><span class="o">.</span><span class="n">get_velocity</span><span class="p">(</span><span class="n">latents</span><span class="p">,</span> <span class="n">noise</span><span class="p">,</span> <span class="n">timesteps</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown prediction type </span><span class="si">{</span><span class="n">noise_scheduler</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">prediction_type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># 概念の事前知識を忘却しないための学習</span>
+                <span class="k">if</span> <span class="n">is_prior_preservation</span><span class="p">:</span>
+                    <span class="c1"># 追加したノイズ `noise` と 予測したノイズ`noise_pred` を</span>
+                    <span class="c1"># 2 つの部分に分けて、それぞれの部分で別々の損失を計算</span>
+                    <span class="n">noise_pred</span><span class="p">,</span> <span class="n">noise_pred_prior</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">noise_pred</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                    <span class="n">target</span><span class="p">,</span> <span class="n">target_prior</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">chunk</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                    <span class="c1"># 追加概念に対する損失を計算</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">noise_pred</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">target</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+                    <span class="c1"># 事前知識に対する損失を計算</span>
+                    <span class="n">prior_loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">noise_pred_prior</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">target_prior</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+
+                    <span class="c1"># 上記の損失を合算</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span> <span class="o">+</span> <span class="n">prior_loss_weight</span> <span class="o">*</span> <span class="n">prior_loss</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">noise_pred</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">target</span><span class="o">.</span><span class="n">float</span><span class="p">(),</span> <span class="n">reduction</span><span class="o">=</span><span class="s2">&quot;mean&quot;</span><span class="p">)</span>
+
+                <span class="n">accelerator</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">sync_gradients</span><span class="p">:</span>
+                    <span class="n">params_to_clip</span> <span class="o">=</span> <span class="p">(</span>
+                        <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">unet</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">text_encoder</span><span class="o">.</span><span class="n">parameters</span><span class="p">())</span>
+                        <span class="k">if</span> <span class="n">hparams</span><span class="o">.</span><span class="n">train_text_encoder</span>
+                        <span class="k">else</span> <span class="n">unet</span><span class="o">.</span><span class="n">parameters</span><span class="p">()</span>
+                    <span class="p">)</span>
+                    <span class="n">accelerator</span><span class="o">.</span><span class="n">clip_grad_norm_</span><span class="p">(</span><span class="n">unet</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">hparams</span><span class="o">.</span><span class="n">max_grad_norm</span><span class="p">)</span>
+                <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+                <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+            <span class="c1"># accelerator がバックグラウンドで最適化工程を実行したかを確認</span>
+            <span class="k">if</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">sync_gradients</span><span class="p">:</span>
+                <span class="n">progress_bar</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">global_step</span> <span class="o">+=</span> <span class="mi">1</span>
+
+            <span class="n">logs</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()}</span>
+            <span class="n">progress_bar</span><span class="o">.</span><span class="n">set_postfix</span><span class="p">(</span><span class="o">**</span><span class="n">logs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">global_step</span> <span class="o">&gt;=</span> <span class="n">hparams</span><span class="o">.</span><span class="n">max_train_steps</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="n">accelerator</span><span class="o">.</span><span class="n">wait_for_everyone</span><span class="p">()</span>
+
+    <span class="c1"># 学習したモデルを元に、pipeline を構築して保存</span>
+    <span class="k">if</span> <span class="n">accelerator</span><span class="o">.</span><span class="n">is_main_process</span><span class="p">:</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+            <span class="n">model_id</span><span class="p">,</span>
+            <span class="n">unet</span><span class="o">=</span><span class="n">accelerator</span><span class="o">.</span><span class="n">unwrap_model</span><span class="p">(</span><span class="n">unet</span><span class="p">),</span>
+            <span class="n">text_encoder</span><span class="o">=</span><span class="n">accelerator</span><span class="o">.</span><span class="n">unwrap_model</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">),</span>
+        <span class="p">)</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">save_pretrained</span><span class="p">(</span><span class="n">hparams</span><span class="o">.</span><span class="n">output_dir_path</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">accelerate</span></code> を用いて Colab notebook 上で効率的な学習を開始します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">accelerate</span>
+
+<span class="n">accelerate</span><span class="o">.</span><span class="n">notebook_launcher</span><span class="p">(</span><span class="n">training_function</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">text_encoder</span><span class="p">,</span> <span class="n">vae</span><span class="p">,</span> <span class="n">unet</span><span class="p">))</span>
+<span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">unet</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">text_encoder</span><span class="o">.</span><span class="n">parameters</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">grad</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">param</span><span class="o">.</span><span class="n">grad</span> <span class="c1"># Colab では RAM の制約があるため勾配に関する情報を削除</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">empty_cache</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Launching training on one GPU.
+</pre></div>
+</div>
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "bab7a4dc84ce476d9e9a62ec10f79154"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "c72bdb5ee96449a88c18c12d72d33b79"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "2b776e20b6bc4dc5b7b4cc29be2aee3a"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "4348358bc6bc49a1b763f5ae1d378451"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "e13a3219375047eb9572c8a040af1a10"}</script><script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f1975d043f7e49e2b1a3c97d61abd819"}</script><div class="output stderr highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;id2label&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;bos_token_id&quot;]` will be overriden.
+`text_config_dict` is provided which will be used to initialize `CLIPTextConfig`. The value `text_config[&quot;eos_token_id&quot;]` will be overriden.
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id3">
+<h3>学習した概念を元に画像を生成する<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h3>
+<p>上記で学習した結果を <code class="docutils literal notranslate"><span class="pre">StableDiffusionPipeline</span></code> で読み込んで、<code class="docutils literal notranslate"><span class="pre">instance_prompt</span></code> を含んだプロンプトで新たな画像を生成させてみましょう。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">diffusers</span> <span class="kn">import</span> <span class="n">DPMSolverMultistepScheduler</span>
+
+<span class="n">scheduler</span> <span class="o">=</span> <span class="n">DPMSolverMultistepScheduler</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span><span class="n">hparams</span><span class="o">.</span><span class="n">output_dir_path</span><span class="p">,</span> <span class="n">subfolder</span><span class="o">=</span><span class="s2">&quot;scheduler&quot;</span><span class="p">)</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">StableDiffusionPipeline</span><span class="o">.</span><span class="n">from_pretrained</span><span class="p">(</span>
+    <span class="n">hparams</span><span class="o">.</span><span class="n">output_dir_path</span><span class="p">,</span>
+    <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">,</span>
+    <span class="n">torch_dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">pipe</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="s2">&quot;cuda&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">instance_prompt</span></code> として設定した <code class="docutils literal notranslate"><span class="pre">&lt;cat-toy&gt;</span></code> を含んだプロンプトを指定して画像を生成させてみます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">prompt</span> <span class="o">=</span> <span class="s2">&quot;A &lt;cat-toy&gt; backpack&quot;</span>
+
+<span class="n">num_samples</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="n">num_rows</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">19950815</span><span class="p">)</span>
+
+<span class="n">all_images</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_rows</span><span class="p">):</span>
+    <span class="n">images</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">(</span>
+        <span class="n">prompt</span><span class="o">=</span><span class="n">prompt</span><span class="p">,</span>
+        <span class="n">num_images_per_prompt</span><span class="o">=</span><span class="n">num_samples</span><span class="p">,</span>
+        <span class="n">generator</span><span class="o">=</span><span class="n">generator</span><span class="p">,</span>
+        <span class="n">num_inference_steps</span><span class="o">=</span><span class="mi">25</span><span class="p">,</span>
+        <span class="n">guidance_scale</span><span class="o">=</span><span class="mi">9</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">images</span>
+    <span class="n">all_images</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">images</span><span class="p">)</span>
+
+<span class="n">image_grid</span><span class="p">(</span><span class="n">all_images</span><span class="p">,</span> <span class="n">num_rows</span><span class="p">,</span> <span class="n">num_samples</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<script type="application/vnd.jupyter.widget-view+json">{"version_major": 2, "version_minor": 0, "model_id": "f926d362c2a64bf3a7ec347ff3311952"}</script><img alt="../_images/51d1c3f7e6cc484b909e6b70e5d907d8a39040cb918fe9be368041faab03061a.png" src="../_images/51d1c3f7e6cc484b909e6b70e5d907d8a39040cb918fe9be368041faab03061a.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./lectures"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="section-07-20.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">前へ</p>
+        <p class="prev-next-title">画像生成 AI 入門: Python による拡散モデルの理論と実践</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="section-07-22.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">次へ</p>
+        <p class="prev-next-title">画像生成 AI 入門: Python による拡散モデルの理論と実践</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目次
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#section-07-play-with-diffusion-model">Section 07. Play with Diffusion Model</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#lecture-21-dreambooth">Lecture 21. DreamBooth</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">セットアップ</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gpu">GPU が使用できるか確認</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#python">利用する Python ライブラリをインストール</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dreambooth">DreamBooth</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">新たな概念をモデルに教えるための設定</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">学習した概念を元に画像を生成する</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+著者 リサーチサイエンティスト 北田俊輔
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
