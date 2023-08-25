@@ -2,6 +2,7 @@
 
 リサーチサイエンティスト [北田 俊輔](https://shunk031.me/), Ph.D.
 
+[![deploy-book](https://github.com/shunk031/coloso-python-diffusion-models/actions/workflows/deploy.yaml/badge.svg)](https://github.com/shunk031/coloso-python-diffusion-models/actions/workflows/deploy.yaml)
 [![License](https://img.shields.io/badge/License-MIT-green)](https://github.com/shunk031/coloso-python-diffusion-models/blob/main/LICENSE)
 ![Python](https://img.shields.io/badge/🐍%20Python-3.8-orange)
 [![Diffusers](https://img.shields.io/badge/🤗%20Diffusers-0.16.0-orange)](https://github.com/huggingface/diffusers)
