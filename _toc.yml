@@ -63,3 +63,6 @@ parts:
   - caption: 受講者特典
     chapters:
       - file: materials/figures/README.md
+      - file: materials/notebooks/activation-functions
+      - file: materials/notebooks/normal-distribution
+      - file: materials/notebooks/distribution-shift
