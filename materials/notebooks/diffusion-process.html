@@ -1,0 +1,764 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="ja" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="拡散過程の可視化" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://shunk031.me/coloso-python-diffusion-models/materials/notebooks/diffusion-process.html" />
+<meta property="og:site_name" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta property="og:description" content="Section 03: Basics of Diffusion Model の Lecture 09: Denoising Diffusion Probabilistic Model (1) にて紹介した拡散過程の可視化について紹介します。 可視化の準備: 可視化で使用する画像をダウンロードしてきます。今回は講座内でも度々登場している画像生成 AI くんの画像を使用してみます。 ノイズ画像へ..." />
+<meta property="og:image" content="https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/logo.png" />
+<meta property="og:image:alt" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta name="description" content="Section 03: Basics of Diffusion Model の Lecture 09: Denoising Diffusion Probabilistic Model (1) にて紹介した拡散過程の可視化について紹介します。 可視化の準備: 可視化で使用する画像をダウンロードしてきます。今回は講座内でも度々登場している画像生成 AI くんの画像を使用してみます。 ノイズ画像へ..." />
+
+    <title>拡散過程の可視化 &#8212; 画像生成AI入門: Pythonによる拡散モデルの理論と実践</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script src="../../_static/translations.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-8ZY8TGCYMR"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-8ZY8TGCYMR');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'materials/notebooks/diffusion-process';</script>
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="分布シフト" href="distribution-shift.html" />
+    <link rel="prev" title="ノイズスケジューラの動作確認" href="noise-scheduler.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ja"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../README.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../README.html">
+                    画像生成 AI 入門：Python による拡散モデルの理論と実践
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-01-03.html">Play with Stable Diffusion!</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-02-05.html">About Deep Learning (2)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-08.html">Score-based Generative Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-09.html">Denoising Diffusion Probabilistic Model (1)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-10.html">Denoising Diffusion Probabilistic Model (2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-11.html">Beyond Conventional GANs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 4</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-04-12.html">About CLIP</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 6</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-06-18.html">Components of Stable Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 7</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-19.html">Stable Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-20.html">Textual Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-21.html">DreamBooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-22.html">Attend-and-Excite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-23.html">ControlNet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-24.html">Prompt-to-Prompt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-25.html">InstructPix2Pix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-26.html">unCLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-27.html">Paint-by-example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-28.html">LoRA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-29.html">Safe Latent Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">受講者特典</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../figures/README.html">高解像度図表</a></li>
+<li class="toctree-l1"><a class="reference internal" href="activation-functions.html">活性化関数のグラフの形状</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linear-regression.html">線形回帰</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal-distribution.html">多次元正規分布の描画</a></li>
+<li class="toctree-l1"><a class="reference internal" href="noise-scheduler.html">ノイズスケジューラの動作確認</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">拡散過程の可視化</a></li>
+<li class="toctree-l1"><a class="reference internal" href="distribution-shift.html">分布シフト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="latent-data.html">潜在データ (latent data) の可視化</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/materials/notebooks/diffusion-process.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onColab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="ソースリポジトリ"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models/issues/new?title=Issue%20on%20page%20%2Fmaterials/notebooks/diffusion-process.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="問題を報告"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="このページをダウンロード">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/materials/notebooks/diffusion-process.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="ソースファイルをダウンロード"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="PDFに印刷"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="全画面モード"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="検索" aria-label="検索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>拡散過程の可視化</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目次 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">可視化の準備</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">ノイズ画像への変換</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">ノイズ画像の可視化</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">逆拡散過程をアニメーション化</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">複数のノイズ画像の作成</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gif">アニメーション GIF 画像の作成</a></li>
+</ul>
+</li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>拡散過程の可視化<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">Section</span> <span class="pre">03:</span> <span class="pre">Basics</span> <span class="pre">of</span> <span class="pre">Diffusion</span> <span class="pre">Model</span></code> の <code class="docutils literal notranslate"><span class="pre">Lecture</span> <span class="pre">09:</span> <span class="pre">Denoising</span> <span class="pre">Diffusion</span> <span class="pre">Probabilistic</span> <span class="pre">Model</span> <span class="pre">(1)</span></code> にて紹介した拡散過程の可視化について紹介します。</p>
+<section id="id2">
+<h2>可視化の準備<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h2>
+<p>可視化で使用する画像をダウンロードしてきます。今回は講座内でも度々登場している画像生成 AI くんの画像を使用してみます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">requests</span>
+<span class="kn">from</span> <span class="nn">PIL</span> <span class="kn">import</span> <span class="n">Image</span>
+<span class="kn">from</span> <span class="nn">PIL.Image</span> <span class="kn">import</span> <span class="n">Image</span> <span class="k">as</span> <span class="n">PilImage</span>
+
+<span class="k">def</span> <span class="nf">download_image</span><span class="p">(</span><span class="n">url</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PilImage</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Image</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">raw</span><span class="p">)</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;https://github.com/shunk031/coloso-python-diffusion-models/blob/main/assets/image_generation_ai_kun.png?raw=true&quot;</span>
+<span class="n">image</span> <span class="o">=</span> <span class="n">download_image</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+<span class="n">image</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/6c939521d0c17f9d4e5024b6be53063e0fe8145580dad5e8e530033322ee934d.png" src="../../_images/6c939521d0c17f9d4e5024b6be53063e0fe8145580dad5e8e530033322ee934d.png" />
+</div>
+</div>
+</section>
+<section id="id3">
+<h2>ノイズ画像への変換<a class="headerlink" href="#id3" title="Permalink to this heading">#</a></h2>
+<p>以下の <code class="docutils literal notranslate"><span class="pre">convert_to_noise_image</span></code> 関数を使用して、オリジナル画像から指定したパラメータ <span class="math notranslate nohighlight">\(\sigma\)</span> を元にノイズ画像を取得します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">convert_to_noise_image</span><span class="p">(</span><span class="n">image_pl</span><span class="p">:</span> <span class="n">PilImage</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PilImage</span><span class="p">:</span>
+    <span class="c1"># PIL 形式の画像を numpy 形式に変換</span>
+    <span class="n">image_np</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">image_pl</span><span class="p">)</span>
+
+    <span class="c1"># 画像に乗せるノイズを正規分布からサンプリング</span>
+    <span class="n">noise</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">image_np</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># numpy 形式に変換した画像にノイズを乗せる</span>
+    <span class="n">image_noise_np</span> <span class="o">=</span> <span class="n">image_np</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">noise</span><span class="p">)</span>
+
+    <span class="c1"># ノイズが乗ってピクセル値が 255 より大きくなっているところは 255 で埋める</span>
+    <span class="n">image_noise_np</span><span class="p">[</span><span class="n">image_noise_np</span> <span class="o">&gt;</span> <span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span>
+    <span class="c1"># 0 より小さくなっているところも同様の後処理を実施</span>
+    <span class="n">image_noise_np</span><span class="p">[</span><span class="n">image_noise_np</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># numpy 形式から PIL 形式へ変換</span>
+    <span class="n">image_noise_pl</span> <span class="o">=</span> <span class="n">Image</span><span class="o">.</span><span class="n">fromarray</span><span class="p">(</span><span class="n">image_noise_np</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">image_noise_pl</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id4">
+<h2>ノイズ画像の可視化<a class="headerlink" href="#id4" title="Permalink to this heading">#</a></h2>
+<p>上記で定義した関数を使って、いくつかノイズ画像を生成してみます。sigma (<span class="math notranslate nohighlight">\(\sigma\)</span>) はノイズ量をコントロールするパラメータです。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">convert_to_noise_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">70</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/c9cd50a884ab809d8af06a67d8c99a9d1090e82034dcbeb984f1afb110bdeb97.png" src="../../_images/c9cd50a884ab809d8af06a67d8c99a9d1090e82034dcbeb984f1afb110bdeb97.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">convert_to_noise_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/b31a3d7209ab0a532adfe9c0ba54824a4a3311ea281d4c69b05c4438c3bc3cb5.png" src="../../_images/b31a3d7209ab0a532adfe9c0ba54824a4a3311ea281d4c69b05c4438c3bc3cb5.png" />
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">convert_to_noise_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/09857aae9d489bda895e3d0561f56e65ae7c9d5b4a269bc36f699aad0edd93e3.png" src="../../_images/09857aae9d489bda895e3d0561f56e65ae7c9d5b4a269bc36f699aad0edd93e3.png" />
+</div>
+</div>
+</section>
+<section id="id5">
+<h2>逆拡散過程をアニメーション化<a class="headerlink" href="#id5" title="Permalink to this heading">#</a></h2>
+<p>オリジナルの画像からノイズを乗せていく拡散過程に対して、ノイズから画像を生成する逆拡散過程によって拡散モデルは画像を生成していました。ここでは、拡散過程を逆にたどるようにしてノイズ画像をいくつか生成したのちに、それらの画像をつなぎ合わせてアニメーション GIF 画像を作成してみます。</p>
+<section id="id6">
+<h3>複数のノイズ画像の作成<a class="headerlink" href="#id6" title="Permalink to this heading">#</a></h3>
+<p>以下のようにして sigma のリストを作成し、それぞれの sigma におけるノイズ画像を生成しておきます。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># sigma のリストを作成</span>
+<span class="n">sigma_list</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logspace</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">3.3</span><span class="p">,</span> <span class="n">num</span><span class="o">=</span><span class="mi">90</span><span class="p">)</span>
+
+<span class="c1"># 各 sigma におけるノイズ画像のリストを作成</span>
+<span class="n">noise_image_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">convert_to_noise_image</span><span class="p">(</span><span class="n">image</span><span class="p">,</span> <span class="n">sigma</span><span class="o">=</span><span class="n">sigma</span><span class="p">)</span> <span class="k">for</span> <span class="n">sigma</span> <span class="ow">in</span> <span class="n">sigma_list</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>各ノイズ画像を一旦保存します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># 画像保存先のパスを指定</span>
+<span class="n">save_dir</span> <span class="o">=</span> <span class="s2">&quot;diffusion_model_images&quot;</span>
+<span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># 作成したノイズ画像を一旦保存</span>
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">noise_image</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">noise_image_list</span><span class="p">):</span>
+    <span class="n">noise_image</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">save_dir</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">i</span><span class="si">:</span><span class="s2">03d</span><span class="si">}</span><span class="s2">.png&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="gif">
+<h3>アニメーション GIF 画像の作成<a class="headerlink" href="#gif" title="Permalink to this heading">#</a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">imagemagick</span></code> をインストールすることで使用できる <code class="docutils literal notranslate"><span class="pre">convert</span></code> コマンドを使用することで、保存したノイズ画像群からアニメーション GIF 画像を作成します。</p>
+<p>まずは <code class="docutils literal notranslate"><span class="pre">imagemagick</span></code> をインストールします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>-q<span class="w"> </span>imagemagick
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Reading package lists...
+Building dependency tree...
+Reading state information...
+imagemagick is already the newest version (8:6.9.10.23+dfsg-2.1ubuntu11.9).
+0 upgraded, 0 newly installed, 0 to remove and 112 not upgraded.
+</pre></div>
+</div>
+</div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">convert</span></code> コマンドが使用できるようになったので、以下のようにして画像を保存したパスを指定し、<code class="docutils literal notranslate"><span class="pre">animation.gif</span></code> を作成します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>convert<span class="w"> </span>-delay<span class="w"> </span><span class="m">10</span><span class="w"> </span>-loop<span class="w"> </span><span class="m">0</span><span class="w"> </span>-reverse<span class="w"> </span>diffusion_model_images/*.png<span class="w"> </span>animation.gif
+</pre></div>
+</div>
+</div>
+</div>
+<p>作成した <code class="docutils literal notranslate"><span class="pre">animation.gif</span></code> を読み込んで確認してみましょう。以下のようにしてノイズ画像から段階を経てきれいな画像が生成される、逆拡散過程をシミュレートしたアニメーション GIF 画像が作成されました。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython</span> <span class="kn">import</span> <span class="n">display</span>
+
+<span class="n">display</span><span class="o">.</span><span class="n">Image</span><span class="p">(</span><span class="s2">&quot;animation.gif&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="o">=</span><span class="s2">&quot;png&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<img alt="../../_images/450ea562638c50f5a4d31ee3e27424d88dff2d8aa6c8e93e048efbb0ea12bb7a.png" src="../../_images/450ea562638c50f5a4d31ee3e27424d88dff2d8aa6c8e93e048efbb0ea12bb7a.png" />
+</div>
+</div>
+</section>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./materials/notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="noise-scheduler.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">前へ</p>
+        <p class="prev-next-title">ノイズスケジューラの動作確認</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="distribution-shift.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">次へ</p>
+        <p class="prev-next-title">分布シフト</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目次
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">可視化の準備</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id3">ノイズ画像への変換</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id4">ノイズ画像の可視化</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id5">逆拡散過程をアニメーション化</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#id6">複数のノイズ画像の作成</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#gif">アニメーション GIF 画像の作成</a></li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+著者 リサーチサイエンティスト 北田俊輔
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>

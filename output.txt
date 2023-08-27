@@ -1,2 +1,3 @@
 lectures/section-07-26.ipynb:190002: [redirected with Found] https://hf.co/stabilityai/stable-diffusion-2-1-unclip to https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip
 lectures/section-07-26.ipynb:170006: [redirected with Found] https://hf.co/stabilityai/stable-diffusion-2-1-unclip-small to https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip-small
+materials/notebooks/activation-functions.ipynb:120004: [redirected temporarily] https://link.medium.com/2ppKTSehzCb to https://rsci.app.link/2ppKTSehzCb?_p=c21429c39f037af6e1038ffce1

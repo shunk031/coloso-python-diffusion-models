@@ -1,0 +1,641 @@
+
+
+<!DOCTYPE html>
+
+
+<html lang="ja" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+<meta property="og:title" content="分布シフト" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://shunk031.me/coloso-python-diffusion-models/materials/notebooks/distribution-shift.html" />
+<meta property="og:site_name" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta property="og:description" content="Section 04: Key Researches Based on Non-Diffusion Models の Lecture 12: About CLIP (Contrastive Language-Image Pre-training) にて紹介した分布シフトを示す図の描画方法について紹介します。 分布シフト (distribution shift) は機械学習システムにとって大き..." />
+<meta property="og:image" content="https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/logo.png" />
+<meta property="og:image:alt" content="画像生成AI入門: Pythonによる拡散モデルの理論と実践" />
+<meta name="description" content="Section 04: Key Researches Based on Non-Diffusion Models の Lecture 12: About CLIP (Contrastive Language-Image Pre-training) にて紹介した分布シフトを示す図の描画方法について紹介します。 分布シフト (distribution shift) は機械学習システムにとって大き..." />
+
+    <title>分布シフト &#8212; 画像生成AI入門: Pythonによる拡散モデルの理論と実践</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../_static/styles/theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/bootstrap.css?digest=e353d410970836974a52" rel="stylesheet" />
+<link href="../../_static/styles/pydata-sphinx-theme.css?digest=e353d410970836974a52" rel="stylesheet" />
+
+  
+  <link href="../../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=e353d410970836974a52" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" href="../../_static/styles/sphinx-book-theme.css?digest=14f4ca6b54d191a8c7657f6c759bf11a5fb86285" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/togglebutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/sphinx-thebe.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
+<link rel="preload" as="script" href="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
+
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/clipboard.min.js"></script>
+    <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/scripts/sphinx-book-theme.js?digest=5a5c038af52cf7bc1a1ec88eea08e6366ee68824"></script>
+    <script>let toggleHintShow = 'Click to show';</script>
+    <script>let toggleHintHide = 'Click to hide';</script>
+    <script>let toggleOpenOnPrint = 'true';</script>
+    <script src="../../_static/togglebutton.js"></script>
+    <script src="../../_static/translations.js"></script>
+    <script>var togglebuttonSelector = '.toggle, .admonition.dropdown';</script>
+    <script src="../../_static/design-tabs.js"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-8ZY8TGCYMR"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-8ZY8TGCYMR');
+            </script>
+    <script>const THEBE_JS_URL = "https://unpkg.com/thebe@0.8.2/lib/index.js"
+const thebe_selector = ".thebe,.cell"
+const thebe_selector_input = "pre"
+const thebe_selector_output = ".output, .cell_output"
+</script>
+    <script async="async" src="../../_static/sphinx-thebe.js"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'materials/notebooks/distribution-shift';</script>
+    <link rel="shortcut icon" href="../../_static/favicon.png"/>
+    <link rel="index" title="索引" href="../../genindex.html" />
+    <link rel="search" title="検索" href="../../search.html" />
+    <link rel="next" title="潜在データ (latent data) の可視化" href="latent-data.html" />
+    <link rel="prev" title="拡散過程の可視化" href="diffusion-process.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="ja"/>
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search this book..."
+         aria-label="Search this book..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+  
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+    </nav>
+  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+    
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+  
+
+<a class="navbar-brand logo" href="../../README.html">
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../_static/logo.png" class="logo__image only-light" alt="Logo image"/>
+    <script>document.write(`<img src="../../_static/logo.png" class="logo__image only-dark" alt="Logo image"/>`);</script>
+  
+  
+</a></div>
+        <div class="sidebar-primary-item"><nav class="bd-links" id="bd-docs-nav" aria-label="Main">
+    <div class="bd-toc-item navbar-nav active">
+        
+        <ul class="nav bd-sidenav bd-sidenav__home-link">
+            <li class="toctree-l1">
+                <a class="reference internal" href="../../README.html">
+                    画像生成 AI 入門：Python による拡散モデルの理論と実践
+                </a>
+            </li>
+        </ul>
+        <p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 1</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-01-03.html">Play with Stable Diffusion!</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 2</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-02-05.html">About Deep Learning (2)</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 3</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-08.html">Score-based Generative Model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-09.html">Denoising Diffusion Probabilistic Model (1)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-10.html">Denoising Diffusion Probabilistic Model (2)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-03-11.html">Beyond Conventional GANs</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 4</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-04-12.html">About CLIP</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 6</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-06-18.html">Components of Stable Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">Section 7</span></p>
+<ul class="nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-19.html">Stable Diffusion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-20.html">Textual Inversion</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-21.html">DreamBooth</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-22.html">Attend-and-Excite</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-23.html">ControlNet</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-24.html">Prompt-to-Prompt</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-25.html">InstructPix2Pix</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-26.html">unCLIP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-27.html">Paint-by-example</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-28.html">LoRA</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../lectures/section-07-29.html">Safe Latent Diffusion</a></li>
+</ul>
+<p aria-level="2" class="caption" role="heading"><span class="caption-text">受講者特典</span></p>
+<ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="../figures/README.html">高解像度図表</a></li>
+<li class="toctree-l1"><a class="reference internal" href="activation-functions.html">活性化関数のグラフの形状</a></li>
+<li class="toctree-l1"><a class="reference internal" href="linear-regression.html">線形回帰</a></li>
+<li class="toctree-l1"><a class="reference internal" href="normal-distribution.html">多次元正規分布の描画</a></li>
+<li class="toctree-l1"><a class="reference internal" href="noise-scheduler.html">ノイズスケジューラの動作確認</a></li>
+<li class="toctree-l1"><a class="reference internal" href="diffusion-process.html">拡散過程の可視化</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">分布シフト</a></li>
+<li class="toctree-l1"><a class="reference internal" href="latent-data.html">潜在データ (latent data) の可視化</a></li>
+</ul>
+
+    </div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+
+<div class="sbt-scroll-pixel-helper"></div>
+
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item"><label class="sidebar-toggle primary-toggle btn btn-sm" for="__primary" title="Toggle primary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <span class="fa-solid fa-bars"></span>
+</label></div>
+      
+    </div>
+  
+  
+    <div class="header-article-items__end">
+      
+        <div class="header-article-item">
+
+<div class="article-header-buttons">
+
+
+
+
+
+<div class="dropdown dropdown-launch-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Launch interactive content">
+    <i class="fas fa-rocket"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://colab.research.google.com/github/shunk031/coloso-python-diffusion-models/blob/main/materials/notebooks/distribution-shift.ipynb" target="_blank"
+   class="btn btn-sm dropdown-item"
+   title="Launch onColab"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  
+    <img src="../../_static/images/logo_colab.png">
+  </span>
+<span class="btn__text-container">Colab</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-source-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Source repositories">
+    <i class="fab fa-github"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models" target="_blank"
+   class="btn btn-sm btn-source-repository-button dropdown-item"
+   title="ソースリポジトリ"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fab fa-github"></i>
+  </span>
+<span class="btn__text-container">Repository</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li><a href="https://github.com/shunk031/coloso-python-diffusion-models/issues/new?title=Issue%20on%20page%20%2Fmaterials/notebooks/distribution-shift.html&body=Your%20issue%20content%20here." target="_blank"
+   class="btn btn-sm btn-source-issues-button dropdown-item"
+   title="問題を報告"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-lightbulb"></i>
+  </span>
+<span class="btn__text-container">Open issue</span>
+</a>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+
+
+<div class="dropdown dropdown-download-buttons">
+  <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-label="このページをダウンロード">
+    <i class="fas fa-download"></i>
+  </button>
+  <ul class="dropdown-menu">
+      
+      
+      
+      <li><a href="../../_sources/materials/notebooks/distribution-shift.ipynb" target="_blank"
+   class="btn btn-sm btn-download-source-button dropdown-item"
+   title="ソースファイルをダウンロード"
+   data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file"></i>
+  </span>
+<span class="btn__text-container">.ipynb</span>
+</a>
+</li>
+      
+      
+      
+      
+      <li>
+<button onclick="window.print()"
+  class="btn btn-sm btn-download-pdf-button dropdown-item"
+  title="PDFに印刷"
+  data-bs-placement="left" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-file-pdf"></i>
+  </span>
+<span class="btn__text-container">.pdf</span>
+</button>
+</li>
+      
+  </ul>
+</div>
+
+
+
+
+<button onclick="toggleFullScreen()"
+  class="btn btn-sm btn-fullscreen-button"
+  title="全画面モード"
+  data-bs-placement="bottom" data-bs-toggle="tooltip"
+>
+  
+
+<span class="btn__icon-container">
+  <i class="fas fa-expand"></i>
+  </span>
+
+</button>
+
+
+<script>
+document.write(`
+  <button class="theme-switch-button btn btn-sm btn-outline-primary navbar-btn rounded-circle" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch" data-mode="light"><i class="fa-solid fa-sun"></i></span>
+    <span class="theme-switch" data-mode="dark"><i class="fa-solid fa-moon"></i></span>
+    <span class="theme-switch" data-mode="auto"><i class="fa-solid fa-circle-half-stroke"></i></span>
+  </button>
+`);
+</script>
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn search-button search-button__button" title="検索" aria-label="検索" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+  </button>
+`);
+</script>
+<label class="sidebar-toggle secondary-toggle btn btn-sm" for="__secondary"title="Toggle secondary sidebar" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="fa-solid fa-list"></span>
+</label>
+</div></div>
+      
+    </div>
+  
+</div>
+</div>
+              
+              
+
+<div id="jb-print-docs-body" class="onlyprint">
+    <h1>分布シフト</h1>
+    <!-- Table of contents -->
+    <div id="print-main-content">
+        <div id="jb-print-toc">
+            
+            <div>
+                <h2> 目次 </h2>
+            </div>
+            <nav aria-label="Page">
+                <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">分布シフト状態の可視化</a></li>
+</ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section class="tex2jax_ignore mathjax_ignore" id="id1">
+<h1>分布シフト<a class="headerlink" href="#id1" title="Permalink to this heading">#</a></h1>
+<p><code class="docutils literal notranslate"><span class="pre">Section</span> <span class="pre">04:</span> <span class="pre">Key</span> <span class="pre">Researches</span> <span class="pre">Based</span> <span class="pre">on</span> <span class="pre">Non-Diffusion</span> <span class="pre">Models</span></code> の <code class="docutils literal notranslate"><span class="pre">Lecture</span> <span class="pre">12:</span> <span class="pre">About</span> <span class="pre">CLIP</span> <span class="pre">(Contrastive</span> <span class="pre">Language-Image</span> <span class="pre">Pre-training)</span></code> にて紹介した分布シフトを示す図の描画方法について紹介します。</p>
+<p>分布シフト (distribution shift) は機械学習システムにとって大きな問題となる現象です。この現象は、モデルが学習対象としたデータの分布が時間の経過とともに変化することで発生します。従って時間が経つにつれてモデルの予測性能が低下していくことは避けられません。</p>
+<p>分布シフトは必ず起こります。このような現象を早期発見してモデルを再構築すべきですが、発生条件は多くの要因に左右されるため、発見することは難しいです。いつのかにか分布シフトが起こっており、いつのまにか予測モデルの性能が落ちていた、ということが頻繁に起こります。</p>
+<p>こうした背景を踏まえて、分布シフトに頑健なモデルの研究が進んでいます。先行研究ではマルチメディアに対する分布シフトの対策が進んでいます <a class="reference external" href="https://dl.acm.org/doi/10.1145/3474085.3478876" rel="noreferrer" target="_blank">[Wang+ MM'21]</a>。更に <a class="reference external" href="https://github.com/torchdrift/torchdrift/" rel="noreferrer" target="_blank"><code class="docutils literal notranslate"><span class="pre">torchdrift</span></code></a> と呼ばれる pytorch のライブラリも開発されています。</p>
+<p>講義内では CLIP <a class="reference external" href="https://arxiv.org/abs/2103.00020" rel="noreferrer" target="_blank">[Radford+ ICML'21]</a> が未知のデータにも頑健で、分布シフトにも強いことが様々な面で検証されていることを説明しました。</p>
+<section id="id2">
+<h2>分布シフト状態の可視化<a class="headerlink" href="#id2" title="Permalink to this heading">#</a></h2>
+<p>今回は分布シフトの一例として、モデルの訓練データ（これまで観測されてきた既知のデータ）とテストデータ（学習後に観測された未知のデータ）において、ズレが生じている状態を擬似的に可視化してみます。</p>
+<p>まずは必要なライブラリをインポートします。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>分布シフト状態のシミュレーションをします。再現性のためまずは乱数の seed を固定します。その後異なるパラメータを有する分布からそれぞれ同じ量だけデータをサンプリングしてきます。最後に可視化に向けて pandas で整形します。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># 乱数の seed を固定</span>
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># 異なる分布からデータをサンプリング</span>
+<span class="n">x1</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+
+<span class="c1"># 可視化に向けた設定</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">),</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">group</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="s2">&quot;Train&quot;</span><span class="p">,</span> <span class="s2">&quot;Test&quot;</span><span class="p">]),</span> <span class="p">[</span><span class="mi">500</span><span class="p">,</span> <span class="mi">500</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">x</span><span class="p">,</span> <span class="s1">&#39;group&#39;</span><span class="p">:</span> <span class="n">group</span><span class="p">}</span>
+
+<span class="c1"># シミュレーションしたデータを pandas 形式へ変換</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>シミュレートした分布シフト状態を以下のように可視化します。可視化には <a class="reference external" href="https://seaborn.pydata.org/generated/seaborn.histplot.html" rel="noreferrer" target="_blank">seaborn の histplot</a> を使用しました。</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+
+<span class="c1"># ヒストグラムとしてプロットする</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">histplot</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="p">,</span> <span class="n">hue</span> <span class="o">=</span> <span class="n">group</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>&lt;Axes: ylabel=&#39;Count&#39;&gt;
+</pre></div>
+</div>
+<img alt="../../_images/627aea1792ddcbd13fb5172cd49fe6a7b0394589525a4d983e72c0d41be5af4a.png" src="../../_images/627aea1792ddcbd13fb5172cd49fe6a7b0394589525a4d983e72c0d41be5af4a.png" />
+</div>
+</div>
+<p>以上のような状態で、訓練データ (Train)  で学習したモデルは、テストデータ (Test) を予測しようとすると分布がズレているため、正しく予測するのは難しくなります。</p>
+</section>
+</section>
+
+    <script type="text/x-thebe-config">
+    {
+        requestKernel: true,
+        binderOptions: {
+            repo: "binder-examples/jupyter-stacks-datascience",
+            ref: "master",
+        },
+        codeMirrorConfig: {
+            theme: "abcdef",
+            mode: "python"
+        },
+        kernelOptions: {
+            name: "python3",
+            path: "./materials/notebooks"
+        },
+        predefinedOutput: true
+    }
+    </script>
+    <script>kernelName = 'python3'</script>
+
+                </article>
+              
+
+              
+              
+                <footer class="bd-footer-article">
+                  
+<div class="footer-article-items footer-article__inner">
+  
+    <div class="footer-article-item"><!-- Previous / next buttons -->
+<div class="prev-next-area">
+    <a class="left-prev"
+       href="diffusion-process.html"
+       title="previous page">
+      <i class="fa-solid fa-angle-left"></i>
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">前へ</p>
+        <p class="prev-next-title">拡散過程の可視化</p>
+      </div>
+    </a>
+    <a class="right-next"
+       href="latent-data.html"
+       title="next page">
+      <div class="prev-next-info">
+        <p class="prev-next-subtitle">次へ</p>
+        <p class="prev-next-title">潜在データ (latent data) の可視化</p>
+      </div>
+      <i class="fa-solid fa-angle-right"></i>
+    </a>
+</div></div>
+  
+</div>
+
+                </footer>
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> 目次
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#id2">分布シフト状態の可視化</a></li>
+</ul>
+  </nav></div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+<div class="bd-footer-content__inner container">
+  
+  <div class="footer-item">
+    
+<p class="component-author">
+著者 リサーチサイエンティスト 北田俊輔
+</p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  <p class="copyright">
+    
+      © Copyright 2023.
+      <br/>
+    
+  </p>
+
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+  <div class="footer-item">
+    
+  </div>
+  
+</div>
+          </footer>
+        
+
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../_static/scripts/bootstrap.js?digest=e353d410970836974a52"></script>
+<script src="../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52"></script>
+
+  <footer class="bd-footer">
+  </footer>
+  </body>
+</html>
