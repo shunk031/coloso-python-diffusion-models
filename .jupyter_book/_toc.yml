@@ -66,6 +66,7 @@ parts:
       - file: materials/notebooks/activation-functions
       - file: materials/notebooks/linear-regression
       - file: materials/notebooks/normal-distribution
+      - file: materials/notebooks/noise-scheduler
       - file: materials/notebooks/diffusion-process
       - file: materials/notebooks/distribution-shift
       - file: materials/notebooks/latent-data
