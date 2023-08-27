@@ -1,0 +1,52 @@
+# Book settings
+# Learn more at https://jupyterbook.org/customize/config.html
+
+title: "画像生成AI入門: Pythonによる拡散モデルの理論と実践"
+author: "リサーチサイエンティスト 北田俊輔"
+copyright: "2023"
+logo: "assets/logo.png"
+
+# Force re-execution of notebooks on each build.
+# See https://jupyterbook.org/content/execute.html
+execute:
+  execute_notebooks: off
+
+# Define the name of the latex output file for PDF builds
+# latex:
+#   latex_documents:
+#     targetname: book.tex
+
+# Add a bibtex file so that we can create citations
+# bibtex_bibfiles:
+#   - references.bib
+
+launch_buttons:
+  colab_url: "https://colab.research.google.com"
+
+# Information about where the book exists on the web
+repository:
+  url: https://github.com/shunk031/coloso-python-diffusion-models  # Online location of your book
+  branch: main  # Which branch of the repository should be used when creating links (optional)
+
+# Add GitHub buttons to your book
+# See https://jupyterbook.org/customize/config.html#add-a-link-to-your-repository
+html:
+  favicon: assets/favicon.png
+  use_issues_button: true
+  use_repository_button: true
+  google_analytics_id: G-8ZY8TGCYMR
+
+sphinx:
+  config:
+    language: ja
+    ogp_site_name: "画像生成AI入門: Pythonによる拡散モデルの理論と実践"
+    ogp_site_url: "https://shunk031.me/coloso-python-diffusion-models/README.html"
+    ogp_image: "https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/assets/logo.png"
+    ogp_description_length: 200
+    linkcheck_ignore:
+      - https://app.diagrams.net/#Uhttps
+      - https://huggingface.co/docs/diffusers/api
+  extra_extensions:
+    - sphinxext.opengraph
+    - sphinxcontrib.external_link
+  

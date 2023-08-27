@@ -16,20 +16,18 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install poetry
-        poetry export --without-hashes -f requirements.txt --output requirements.txt
-        pip install -r requirements.txt
+        make setup
     
     # Check external links in the book
     - name: Check external links
       run: |
-        jupyter-book build . --builder linkcheck
+        make check
 
     # Build the book
     - name: Build the book
       if: github.event_name == 'push' && github.ref == 'refs/heads/main'
       run: |
-        jupyter-book build .
+        make build
 
     # Push the book's HTML to github-pages
     - name: GitHub Pages action
