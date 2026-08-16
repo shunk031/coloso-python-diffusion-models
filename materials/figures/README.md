@@ -68,7 +68,7 @@
 
 | SVG | PNG |
 |-----|-----|
-| ![](https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/materials/figures/drawio/svg/LoRA.drawio.svg) | ![](https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/materials/figures/drawio/png/LoRA.drawio.png) |
+| ![](https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/materials/figures/drawio/svg/prefix-tuning.drawio.svg) | ![](https://raw.githubusercontent.com/shunk031/coloso-python-diffusion-models/main/materials/figures/drawio/png/prefix-tuning.drawio.png) |
 
 ## Transformer [`[Vaswani+ NeurIPS'17]`](https://arxiv.org/abs/1706.03762)
 
